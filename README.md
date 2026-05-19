@@ -156,3 +156,47 @@ Não encontrei esse tema nos materiais cadastrados. Vou responder com meu conhec
 ```
 
 Esse comportamento evita a “cegueira de contexto” sem enfraquecer o RAG. O usuário sabe quando a resposta veio dos materiais e quando veio do conhecimento geral da LLM.
+
+
+## Interface Web Premium
+
+Além do protótipo em Streamlit, o projeto possui uma interface web própria com FastAPI + HTML/CSS/JS.
+
+Rodar localmente:
+
+```bash
+source .venv/bin/activate
+python -m uvicorn web_api.main:app --reload
+```
+
+Acesse:
+
+```text
+http://127.0.0.1:8000
+```
+
+A interface web oferece:
+
+- chat acadêmico com JARVIS;
+- painel de fontes recuperadas pelo RAG;
+- painel de ferramentas chamadas;
+- upload de documentos;
+- listagem e criação de tarefas;
+- consulta e criação de eventos de agenda;
+- visualização de logs técnicos.
+
+O Streamlit (`app.py`) foi mantido como plano B de execução.
+
+## Deploy online
+
+A aplicação pode ser publicada em serviços que executam Python/FastAPI, como Render ou Railway.
+
+O arquivo `render.yaml` contém uma configuração inicial para deploy no Render. Recomenda-se iniciar em `LLM_MODE=mock` e ativar `LLM_MODE=gemma` apenas para homologação ou gravação, evitando consumo excessivo da API do LIA.
+
+Comando de start esperado:
+
+```bash
+uvicorn web_api.main:app --host 0.0.0.0 --port $PORT
+```
+
+Importante: nunca coloque `GEMMA_API_KEY` no frontend nem no GitHub. Configure a chave apenas nas variáveis de ambiente da plataforma de deploy.

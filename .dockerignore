@@ -1,0 +1,17 @@
+.env
+.venv
+venv
+env
+__pycache__
+*.pyc
+.git
+.gitignore
+logs/*.jsonl
+storage/*.json
+storage/index_cache
+data/uploads/*
+!data/uploads/.gitkeep
+frontend/node_modules
+frontend/dist
+.pytest_cache
+*.zip

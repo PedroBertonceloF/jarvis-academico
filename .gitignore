@@ -24,3 +24,14 @@ evidencias/
 # Materiais importados localmente pela interface
 data/uploads/*
 !data/uploads/.gitkeep
+
+# Frontend React/Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
