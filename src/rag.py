@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import json
 import re
-from typing import Iterable
 
 import faiss
 import numpy as np
@@ -17,9 +15,25 @@ from .llm_client import GemmaClient
 
 SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".py"}
 
+STOPWORDS_BUSCA = {
+    "a", "o", "as", "os", "um", "uma", "uns", "umas",
+    "de", "da", "do", "das", "dos", "em", "no", "na", "nos", "nas",
+    "para", "por", "com", "sem", "sobre", "entre", "até", "ate",
+    "que", "qual", "quais", "quem", "quando", "onde", "como", "porque", "porquê",
+    "é", "e", "ou", "se", "ao", "aos", "à", "às",
+    "me", "meu", "minha", "seu", "sua", "dele", "dela",
+    "explique", "explica", "resuma", "resumo", "defina", "conceito", "conceitos",
+    "funciona", "funcionam", "serve", "servem", "fale", "diga", "quero", "saber",
+    "academico", "acadêmico", "faculdade", "disciplina", "conteudo", "conteúdo",
+}
+
 
 def tokenizar(texto: str) -> list[str]:
     return re.findall(r"\w+", texto.lower())
+
+
+def termos_relevantes(texto: str) -> list[str]:
+    return [t for t in tokenizar(texto) if len(t) >= 3 and t not in STOPWORDS_BUSCA]
 
 
 def normalizar(v: np.ndarray) -> np.ndarray:
@@ -94,6 +108,8 @@ class RagConfig:
     tamanho_chunk: int = 700
     sobreposicao: int = 80
     alpha_hibrido: float = 0.6
+    min_sobreposicao_termos: int = 1
+    min_score_dense: float = 0.42
 
 
 class RagEngine:
@@ -189,8 +205,48 @@ class RagEngine:
             return self.recuperar_dense(pergunta, k=k)
         return self.recuperar_hibrido(pergunta, k=k)
 
+    def _diagnosticar_relevancia(self, pergunta: str, docs: list[dict]) -> dict:
+        termos_pergunta = set(termos_relevantes(pergunta))
+        texto_contexto = " ".join(d.get("texto", "") for d in docs)
+        termos_contexto = set(termos_relevantes(texto_contexto))
+        termos_encontrados = sorted(termos_pergunta.intersection(termos_contexto))
+
+        score_dense_top = 0.0
+        if self.modelo_embed is not None and self.matriz_emb is not None and len(self.matriz_emb):
+            q = self.modelo_embed.encode([pergunta], normalize_embeddings=True).astype("float32")
+            score_dense_top = float(np.max(np.dot(self.matriz_emb, q[0])))
+
+        return {
+            "termos_relevantes_pergunta": sorted(termos_pergunta),
+            "termos_encontrados_no_contexto": termos_encontrados,
+            "qtd_termos_encontrados": len(termos_encontrados),
+            "score_dense_top": round(score_dense_top, 4),
+        }
+
+    def _resultado_vazio(self, diagnostico: dict) -> bool:
+        """Detecta quando o RAG recuperou apenas vizinhos fracos/indiretos.
+
+        O score híbrido é normalizado e pode parecer alto mesmo para tema fora da base.
+        Por isso usamos sinais mais confiáveis: sobreposição de termos relevantes
+        e similaridade densa bruta mínima.
+        """
+        tem_termo_no_contexto = diagnostico["qtd_termos_encontrados"] >= self.config.min_sobreposicao_termos
+        tem_similaridade_minima = diagnostico["score_dense_top"] >= self.config.min_score_dense
+        return not (tem_termo_no_contexto or tem_similaridade_minima)
+
     def responder(self, pergunta: str, metodo: str = "hibrido", k: int = 3) -> dict:
         docs = self.buscar(pergunta, metodo=metodo, k=k)
+        diagnostico = self._diagnosticar_relevancia(pergunta, docs)
+
+        if self._resultado_vazio(diagnostico):
+            return {
+                "resposta": "RESULTADO_VAZIO: O tema não foi encontrado nos materiais cadastrados.",
+                "resultado_vazio": True,
+                "fonte_resposta": "sem_material_cadastrado",
+                "documentos_recuperados": docs,
+                "diagnostico_recuperacao": diagnostico,
+            }
+
         contexto = "\n\n".join(
             f"Trecho {i+1} | Fonte: {d['fonte']} | ID: {d['id']}\n{d['texto']}"
             for i, d in enumerate(docs)
@@ -206,4 +262,10 @@ class RagEngine:
             {"role": "system", "content": "Você responde perguntas acadêmicas com base em evidências recuperadas."},
             {"role": "user", "content": prompt},
         ])
-        return {"resposta": resposta, "documentos_recuperados": docs}
+        return {
+            "resposta": resposta,
+            "resultado_vazio": False,
+            "fonte_resposta": "materiais_rag",
+            "documentos_recuperados": docs,
+            "diagnostico_recuperacao": diagnostico,
+        }

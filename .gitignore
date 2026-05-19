@@ -20,3 +20,7 @@ evidencias/
 # Arquivos grandes locais
 *.zip
 *.tar.gz
+
+# Materiais importados localmente pela interface
+data/uploads/*
+!data/uploads/.gitkeep

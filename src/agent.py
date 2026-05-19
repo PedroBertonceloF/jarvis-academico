@@ -55,11 +55,13 @@ Regras obrigatórias:
 - Responda SOMENTE com JSON válido.
 - Se nenhuma ferramenta for necessária, responda: []
 - Formato: [{{"tool": "nome_da_ferramenta", "args": {{...}}}}]
-- Para perguntas sobre materiais/conteúdo/explicações, use buscar_material_rag.
 - Para agenda, use consultar_agenda.
 - Para tarefas, use listar_tarefas, adicionar_tarefa ou concluir_tarefa.
 - Para plano/prioridade de estudos, use planejar_estudos.
 - Para exercícios ou prática, use gerar_exercicios.
+- Para dúvidas acadêmicas, explicações, resumos e conceitos de estudo, chame buscar_material_rag primeiro.
+- Mesmo que o tema pareça amplo ou não esteja claramente nos materiais, use buscar_material_rag para verificar a base local.
+- Se for apenas conversa casual, saudação ou pedido não acadêmico, responda [].
 
 Mensagem do usuário: {mensagem_usuario}
 """.strip()
@@ -93,13 +95,16 @@ Mensagem do usuário: {mensagem_usuario}
                 {"role": "user", "content": mensagem_usuario},
             ])
 
-        # Economia de tokens: se a única ferramenta foi RAG e ela já gerou a resposta,
+        # Economia de tokens: se a única ferramenta foi RAG e ela encontrou evidência,
         # devolvemos direto sem chamar a LLM novamente apenas para reescrever.
+        # Se o RAG marcou resultado_vazio=True, deixamos a LLM gerar o fallback acadêmico
+        # com aviso de fonte, pois nesse caso a resposta vem do conhecimento geral do modelo.
         if (
             len(resultados) == 1
             and resultados[0].get("tool") == "buscar_material_rag"
             and isinstance(resultados[0].get("saida"), dict)
             and resultados[0]["saida"].get("resposta")
+            and not resultados[0]["saida"].get("resultado_vazio", False)
         ):
             saida = resultados[0]["saida"]
             fontes = sorted({
@@ -115,6 +120,14 @@ Mensagem do usuário: {mensagem_usuario}
 Responda ao usuário de forma objetiva, acadêmica e útil.
 Use os resultados das ferramentas abaixo. Quando houver documentos recuperados, cite o nome da fonte.
 
+Regra de transparência e governança:
+- Se a ferramenta buscar_material_rag retornar resultado_vazio=true ou a mensagem "RESULTADO_VAZIO",
+  você DEVE iniciar a resposta exatamente com:
+  "Não encontrei esse tema nos materiais cadastrados. Vou responder com meu conhecimento geral da base de dados do modelo."
+- Depois do aviso, explique o conceito de forma didática usando conhecimento geral da LLM.
+- Ao final, sugira que o aluno importe um PDF, anotação ou material sobre o tema para que respostas futuras sejam baseadas no RAG.
+- Se houver documentos recuperados com evidência suficiente, baseie a resposta neles e cite as fontes.
+
 Pergunta do usuário:
 {mensagem_usuario}
 
@@ -122,6 +135,6 @@ Resultados das ferramentas:
 {resultados_compactos}
 """.strip()
         return self.llm.chat([
-            {"role": "system", "content": "Você é o JARVIS Acadêmico. Integre resultados das ferramentas sem inventar dados."},
+            {"role": "system", "content": "Você é o JARVIS Acadêmico. Integre resultados das ferramentas com transparência sobre a origem da informação."},
             {"role": "user", "content": prompt},
         ], temperature=0.2, max_tokens=450)

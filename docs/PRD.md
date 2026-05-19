@@ -28,3 +28,18 @@ Estudantes que precisam consultar materiais, organizar agenda, controlar tarefas
 - As ferramentas são chamadas pela LLM e registradas em log.
 - O RAG recupera documentos relevantes e responde com base nos trechos.
 - A entrega contém documentação, testes básicos, avaliação e análise de erros.
+
+
+## Melhoria implementada
+
+O sistema permite que o usuário importe materiais acadêmicos diretamente pela interface Streamlit. Os arquivos são persistidos em `data/uploads/` e passam a compor a base de conhecimento após a reindexação.
+
+## Requisito adicional: fallback acadêmico transparente
+
+Quando a pergunta do usuário for acadêmica, mas não houver evidência suficiente nos materiais cadastrados, o JARVIS deve:
+
+1. indicar claramente que o tema não foi encontrado nos materiais;
+2. responder usando conhecimento geral da LLM;
+3. sugerir que o aluno importe material sobre o tema para respostas futuras baseadas em RAG.
+
+Esse requisito torna o sistema mais útil como tutor sem comprometer a transparência sobre a origem da informação.

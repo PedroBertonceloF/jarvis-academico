@@ -7,6 +7,7 @@ O sistema implementa RAG, tool calling com Gemma 12B, agenda acadêmica, lista d
 ## Funcionalidades
 
 - Consulta a materiais de estudo com RAG.
+- Importação de documentos pela interface Streamlit (`.pdf`, `.md`, `.txt` e `.py`).
 - Agenda acadêmica local em JSON.
 - Lista de tarefas com adicionar, listar e concluir.
 - Planejamento de estudos combinando agenda, tarefas e materiais.
@@ -85,6 +86,8 @@ python scripts/evaluate_system.py
 
 A pasta `data/` contém 10 documentos acadêmicos iniciais em Markdown, cobrindo RAG, BM25, embeddings, FAISS, KNN, normalização, gradiente descendente, regressão linear, regressão logística e tool calling.
 
+Também é possível importar novos materiais pela barra lateral da interface. Os arquivos enviados são salvos em `data/uploads/` e a base pode ser reindexada em seguida.
+
 Documentação do dataset: `data/README_DATASET.md`.
 
 ## Tool calling
@@ -136,3 +139,20 @@ Preencher conforme o uso real do grupo. Sugestão:
 
 - ChatGPT: apoio na estruturação, revisão e documentação.
 - Gemma 12B: LLM usada em execução real do sistema.
+
+## Fallback acadêmico com transparência
+
+O JARVIS usa o RAG como fonte primária para dúvidas acadêmicas. Quando o usuário pergunta algo que não aparece nos materiais cadastrados, o sistema não apresenta uma resposta como se ela viesse dos documentos.
+
+Fluxo implementado:
+
+1. A LLM decide chamar `buscar_material_rag` para verificar os materiais locais.
+2. O RAG calcula sinais de relevância, como termos encontrados no contexto e similaridade densa.
+3. Se não houver evidência suficiente, a ferramenta retorna `resultado_vazio=true` e a mensagem `RESULTADO_VAZIO`.
+4. O agente gera uma resposta de conhecimento geral iniciando com o aviso obrigatório:
+
+```text
+Não encontrei esse tema nos materiais cadastrados. Vou responder com meu conhecimento geral da base de dados do modelo.
+```
+
+Esse comportamento evita a “cegueira de contexto” sem enfraquecer o RAG. O usuário sabe quando a resposta veio dos materiais e quando veio do conhecimento geral da LLM.

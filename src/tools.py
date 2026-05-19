@@ -40,9 +40,9 @@ TOOL_SPECS = [
     },
     {
         "name": "buscar_material_rag",
-        "description": "Busca e responde perguntas sobre os materiais acadêmicos usando RAG.",
+        "description": "Busca informações nos materiais acadêmicos locais usando RAG. Use para verificar se um conceito está nos documentos do aluno. Se o tema não estiver na base, a ferramenta retorna RESULTADO_VAZIO para permitir fallback acadêmico transparente.",
         "args": {
-            "pergunta": "Pergunta do usuário sobre os documentos.",
+            "pergunta": "Pergunta acadêmica ou conceito que deve ser verificado nos documentos locais.",
             "metodo": "bm25, dense ou hibrido. Padrão: hibrido.",
             "k": "Quantidade de chunks recuperados. Padrão: 3.",
         },
@@ -112,6 +112,7 @@ class ToolRegistry:
             "tema": tema,
             "quantidade": int(quantidade),
             "base_para_exercicios": contexto,
+            "resultado_vazio": resultado.get("resultado_vazio", False),
             "documentos_recuperados": resultado["documentos_recuperados"],
         }
 

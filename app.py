@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime
 import json
+from pathlib import Path
+import re
 
 import streamlit as st
 
 from src.agent import JarvisAgent
-from src.rag import RagEngine
+from src.config import settings
+from src.rag import RagEngine, SUPPORTED_EXTENSIONS
 from src.storage import AgendaStore, EventoAgenda, Tarefa, TarefaStore, inicializar_dados_demo
 
 st.set_page_config(page_title="JARVIS Acadêmico", page_icon="🎓", layout="wide")
@@ -23,6 +27,36 @@ def get_agent() -> JarvisAgent:
     return JarvisAgent()
 
 
+UPLOADS_DIR = settings.data_dir / "uploads"
+
+
+def nome_arquivo_seguro(nome: str) -> str:
+    """Remove caracteres problemáticos do nome do arquivo enviado pelo usuário."""
+    path = Path(nome)
+    ext = path.suffix.lower()
+    stem = re.sub(r"[^a-zA-Z0-9_-]+", "_", path.stem).strip("_") or "documento"
+    return f"{stem}{ext}"
+
+
+def salvar_documento_enviado(uploaded_file) -> Path:
+    """Salva arquivo enviado pelo Streamlit na pasta data/uploads."""
+    ext = Path(uploaded_file.name).suffix.lower()
+    if ext not in SUPPORTED_EXTENSIONS:
+        permitidos = ", ".join(sorted(SUPPORTED_EXTENSIONS))
+        raise ValueError(f"Formato não suportado: {ext}. Permitidos: {permitidos}")
+
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    nome_seguro = nome_arquivo_seguro(uploaded_file.name)
+    destino = UPLOADS_DIR / nome_seguro
+
+    if destino.exists():
+        carimbo = datetime.now().strftime("%Y%m%d_%H%M%S")
+        destino = UPLOADS_DIR / f"{Path(nome_seguro).stem}_{carimbo}{ext}"
+
+    destino.write_bytes(uploaded_file.getbuffer())
+    return destino
+
+
 st.title("🎓 JARVIS Acadêmico")
 st.caption("Assistente inteligente com RAG, agenda, tarefas e tool calling via Gemma 12B.")
 
@@ -31,6 +65,25 @@ with st.sidebar:
     rag = get_rag()
     st.write(f"Documentos: **{len(rag.docs)}**")
     st.write(f"Chunks: **{len(rag.chunks)}**")
+
+    with st.expander("Importar documentos", expanded=True):
+        st.caption("Envie arquivos `.pdf`, `.md`, `.txt` ou `.py`. Eles serão salvos em `data/uploads/`.")
+        arquivos = st.file_uploader(
+            "Selecionar materiais",
+            type=["pdf", "md", "txt", "py"],
+            accept_multiple_files=True,
+        )
+        importar = st.button("Salvar e reindexar", disabled=not arquivos)
+        if importar and arquivos:
+            try:
+                salvos = [salvar_documento_enviado(arquivo) for arquivo in arquivos]
+                st.success(f"{len(salvos)} arquivo(s) importado(s). Reindexando base...")
+                get_rag.clear()
+                get_agent.clear()
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro ao importar documento: {e}")
+
     if st.button("Reindexar materiais"):
         get_rag.clear()
         get_agent.clear()

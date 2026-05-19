@@ -19,3 +19,13 @@
 - **Tipo:** engenharia/custo.
 - **Causa provável:** enviar muitos chunks ou respostas longas para a LLM aumenta o consumo da API compartilhada.
 - **Possível solução:** usar `LLM_MODE=mock` no desenvolvimento, `k=3` no RAG e `max_tokens` reduzido na Gemma.
+
+## Falha tratada: pergunta fora dos materiais
+
+| Campo | Descrição |
+|---|---|
+| Falha | O usuário pergunta um conceito acadêmico fora do dataset, por exemplo: “O que é heap?” |
+| Tipo | Recuperação / cobertura do dataset |
+| Causa | A base local contém documentos focados em IA, mas não cobre todos os conceitos de Computação. O RAG recupera vizinhos semanticamente fracos ou não encontra evidência suficiente. |
+| Solução aplicada | Implementação do fallback acadêmico com transparência. O RAG retorna `resultado_vazio=true`; o agente inicia a resposta com aviso explícito de que não encontrou o tema nos materiais e responde usando conhecimento geral da LLM. |
+| Próxima melhoria | Permitir que o aluno importe PDFs e anotações de outras disciplinas para ampliar a cobertura do RAG. |

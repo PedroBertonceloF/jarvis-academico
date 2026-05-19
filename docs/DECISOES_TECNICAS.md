@@ -20,3 +20,23 @@ A chave da API fica no `.env`, que está no `.gitignore`. O arquivo `.env.exampl
 
 ## 7. Testes
 Foram incluídos testes básicos para chunking e armazenamento. O objetivo é demonstrar engenharia mínima e reduzir risco de quebra em pontos centrais.
+
+## Decisão: fallback acadêmico com aviso de fonte
+
+Foi decidido não deixar o modelo totalmente preso ao RAG nem totalmente livre. A arquitetura adotada usa o RAG como fonte primária e permite fallback geral somente quando a própria ferramenta de busca sinaliza falta de evidência.
+
+Motivo:
+
+- preservar o requisito central do trabalho, que é demonstrar RAG;
+- evitar respostas sem utilidade quando o conteúdo não está no dataset;
+- manter transparência para o usuário sobre a origem da resposta;
+- gerar evidência de tool calling nos logs mesmo em perguntas fora da base.
+
+Exemplo:
+
+```text
+Usuário: O que é heap?
+Sistema: chama buscar_material_rag.
+RAG: retorna resultado_vazio=true.
+JARVIS: responde com aviso de conhecimento geral e sugere importar material.
+```

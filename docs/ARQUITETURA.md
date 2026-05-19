@@ -40,3 +40,27 @@ O projeto usa módulos profundos com interfaces simples. O agente não precisa c
 ## Modos de execução
 - `LLM_MODE=mock`: desenvolvimento sem consumo de tokens.
 - `LLM_MODE=gemma`: validação real usando Gemma 12B via API.
+
+
+## Upload de documentos
+
+A interface Streamlit usa `st.file_uploader` para receber arquivos `.pdf`, `.md`, `.txt` e `.py`. Os arquivos são salvos em `data/uploads/`. Após salvar, o cache do RAG e do agente é limpo para forçar nova indexação dos materiais.
+
+## Fallback acadêmico com governança
+
+Foi adicionada uma camada de transparência para perguntas acadêmicas fora da base local. O objetivo é evitar dois problemas comuns em sistemas RAG:
+
+1. o assistente parecer incapaz quando o tema não está nos documentos;
+2. o assistente responder com conhecimento geral fingindo que usou os materiais.
+
+O fluxo é:
+
+```text
+Pergunta acadêmica → buscar_material_rag → diagnóstico de relevância
+                                      ↓
+                    evidência suficiente? sim → resposta baseada no RAG
+                                      ↓ não
+                    RESULTADO_VAZIO → resposta geral com aviso de fonte
+```
+
+O diagnóstico de relevância considera a sobreposição de termos relevantes da pergunta com o contexto recuperado e a similaridade densa bruta. Isso é necessário porque o score híbrido é normalizado e pode parecer alto mesmo quando o tema está fora da base.

@@ -113,7 +113,11 @@ class GemmaClient:
                     break
             return [{"tool": "gerar_exercicios", "args": {"tema": tema, "quantidade": 3}}]
 
-        if any(p in m for p in ["explique", "resuma", "material", "rag", "bm25", "embedding", "embeddings", "faiss", "knn", "gradiente", "regressão", "regressao", "logística", "logistica"]):
+        if any(p in m for p in [
+            "explique", "explica", "resuma", "defina", "o que é", "o que e", "como funciona",
+            "material", "conceito", "conceitos", "rag", "bm25", "embedding", "embeddings", "faiss",
+            "knn", "gradiente", "regressão", "regressao", "logística", "logistica", "heap", "grafos", "sql"
+        ]):
             return [{"tool": "buscar_material_rag", "args": {"pergunta": mensagem, "metodo": "hibrido", "k": 3}}]
 
         return []
@@ -133,7 +137,16 @@ class GemmaClient:
             tool = item.get("tool", "")
             saida = item.get("saida")
             if tool == "buscar_material_rag" and isinstance(saida, dict):
-                partes.append("\nResposta RAG: " + str(saida.get("resposta", "")))
+                if saida.get("resultado_vazio"):
+                    partes.append(
+                        "\nNão encontrei esse tema nos materiais cadastrados. "
+                        "Vou responder com meu conhecimento geral da base de dados do modelo.\n\n"
+                        "Em modo mock, o fallback geral foi acionado corretamente. "
+                        "Na validação com Gemma, aqui será gerada uma explicação didática sobre o conceito solicitado.\n\n"
+                        "Sugestão: importe um PDF, anotação ou material sobre esse tema para que respostas futuras sejam baseadas no RAG."
+                    )
+                else:
+                    partes.append("\nResposta RAG: " + str(saida.get("resposta", "")))
                 docs = saida.get("documentos_recuperados", [])
                 if docs:
                     fontes = ", ".join(sorted({str(d.get("fonte", "")) for d in docs if d.get("fonte")}))
