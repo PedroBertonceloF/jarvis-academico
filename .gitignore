@@ -1,0 +1,22 @@
+.env
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.bak_tokens
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+
+# Logs e dados gerados localmente
+logs/*.jsonl
+storage/*.json
+storage/index_cache/
+avaliacao_sistema.csv
+evidencias/
+
+# Arquivos grandes locais
+*.zip
+*.tar.gz
