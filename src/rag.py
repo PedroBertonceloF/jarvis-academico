@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import os
 import re
+from typing import Any
 
-import faiss
 import numpy as np
 from pypdf import PdfReader
 from rank_bm25 import BM25Okapi
-from sentence_transformers import SentenceTransformer
 
 from .config import settings
 from .llm_client import GemmaClient
@@ -112,12 +112,35 @@ class RagConfig:
     min_score_dense: float = 0.42
 
 
+def modo_rag_lexical() -> bool:
+    """Ativa um modo leve para deploy público.
+
+    Em serviços gratuitos, carregar SentenceTransformer + FAISS pode consumir muita
+    memória e derrubar o backend. Quando RAG_MODE=lexical, o sistema usa BM25
+    para recuperação e mantém o fallback acadêmico funcionando sem baixar modelos
+    pesados do HuggingFace.
+    """
+    return os.getenv("RAG_MODE", "").strip().lower() in {"lexical", "bm25", "light"}
+
+
+def _carregar_sentence_transformer():
+    from sentence_transformers import SentenceTransformer
+
+    return SentenceTransformer(settings.embedding_model)
+
+
+def _criar_indice_faiss(dim: int):
+    import faiss
+
+    return faiss.IndexFlatIP(dim)
+
+
 class RagEngine:
     def __init__(self, config: RagConfig | None = None, carregar_agora: bool = True) -> None:
         self.config = config or RagConfig()
         self.docs: list[dict] = []
         self.chunks: list[dict] = []
-        self.modelo_embed: SentenceTransformer | None = None
+        self.modelo_embed: Any | None = None
         self.matriz_emb: np.ndarray | None = None
         self.indice_faiss = None
         self.indice_bm25 = None
@@ -150,7 +173,19 @@ class RagEngine:
         corpus_tokenizado = [tokenizar(c["texto"]) for c in self.chunks]
         self.indice_bm25 = BM25Okapi(corpus_tokenizado)
 
-        self.modelo_embed = SentenceTransformer(settings.embedding_model)
+        # Modo leve para deploy público: evita baixar/carregar modelos densos.
+        # O RAG continua funcional via BM25 e o fallback acadêmico continua ativo.
+        if modo_rag_lexical():
+            self.modelo_embed = None
+            self.matriz_emb = None
+            self.indice_faiss = None
+            return {
+                "documentos": len(self.docs),
+                "chunks": len(self.chunks),
+                "modo_recuperacao": "lexical_bm25",
+            }
+
+        self.modelo_embed = _carregar_sentence_transformer()
         textos = [c["texto"] for c in self.chunks]
         self.matriz_emb = self.modelo_embed.encode(
             textos,
@@ -158,12 +193,16 @@ class RagEngine:
             show_progress_bar=False,
         ).astype("float32")
 
-        self.indice_faiss = faiss.IndexFlatIP(self.matriz_emb.shape[1])
+        self.indice_faiss = _criar_indice_faiss(self.matriz_emb.shape[1])
         self.indice_faiss.add(self.matriz_emb)
-        return {"documentos": len(self.docs), "chunks": len(self.chunks)}
+        return {
+            "documentos": len(self.docs),
+            "chunks": len(self.chunks),
+            "modo_recuperacao": "hibrido_dense_bm25",
+        }
 
     def _garantir_indice(self) -> None:
-        if not self.chunks or self.indice_bm25 is None or self.indice_faiss is None:
+        if not self.chunks or self.indice_bm25 is None:
             raise RuntimeError("Índice RAG vazio. Coloque documentos na pasta /data e rode reindexar().")
 
     def recuperar_bm25(self, pergunta: str, k: int = 3) -> list[dict]:
@@ -174,12 +213,16 @@ class RagEngine:
 
     def recuperar_dense(self, pergunta: str, k: int = 3) -> list[dict]:
         self._garantir_indice()
+        if self.modelo_embed is None or self.indice_faiss is None:
+            return self.recuperar_bm25(pergunta, k=k)
         q = self.modelo_embed.encode([pergunta], normalize_embeddings=True).astype("float32")
         scores, idx = self.indice_faiss.search(q, min(k, len(self.chunks)))
         return [self._formatar_resultado(int(i), float(scores[0][j])) for j, i in enumerate(idx[0]) if i >= 0]
 
     def recuperar_hibrido(self, pergunta: str, k: int = 3, alpha: float | None = None) -> list[dict]:
         self._garantir_indice()
+        if self.modelo_embed is None or self.matriz_emb is None:
+            return self.recuperar_bm25(pergunta, k=k)
         alpha = self.config.alpha_hibrido if alpha is None else alpha
         score_bm25 = np.array(self.indice_bm25.get_scores(tokenizar(pergunta)), dtype="float32")
         q = self.modelo_embed.encode([pergunta], normalize_embeddings=True).astype("float32")
@@ -198,6 +241,8 @@ class RagEngine:
         }
 
     def buscar(self, pergunta: str, metodo: str = "hibrido", k: int = 3) -> list[dict]:
+        if not self.chunks or self.indice_bm25 is None:
+            return []
         metodo = metodo.lower().strip()
         if metodo == "bm25":
             return self.recuperar_bm25(pergunta, k=k)
@@ -221,6 +266,7 @@ class RagEngine:
             "termos_encontrados_no_contexto": termos_encontrados,
             "qtd_termos_encontrados": len(termos_encontrados),
             "score_dense_top": round(score_dense_top, 4),
+            "modo_recuperacao": "lexical_bm25" if modo_rag_lexical() else "hibrido_dense_bm25",
         }
 
     def _resultado_vazio(self, diagnostico: dict) -> bool:
@@ -238,7 +284,7 @@ class RagEngine:
         docs = self.buscar(pergunta, metodo=metodo, k=k)
         diagnostico = self._diagnosticar_relevancia(pergunta, docs)
 
-        if self._resultado_vazio(diagnostico):
+        if not docs or self._resultado_vazio(diagnostico):
             return {
                 "resposta": "RESULTADO_VAZIO: O tema não foi encontrado nos materiais cadastrados.",
                 "resultado_vazio": True,

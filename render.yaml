@@ -13,5 +13,7 @@ services:
         value: google/gemma-3-12b-it
       - key: EMBEDDING_MODEL
         value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      - key: RAG_MODE
+        value: lexical
       - key: PYTHONUNBUFFERED
         value: "1"

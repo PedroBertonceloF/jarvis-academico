@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -79,12 +80,22 @@ def _nome_arquivo_seguro(nome: str) -> str:
 
 
 def _resumo_base() -> dict[str, Any]:
-    rag = _get_rag()
-    return {
-        "documentos": len(rag.docs),
-        "chunks": len(rag.chunks),
-        "arquivos": sorted({doc.get("fonte", "") for doc in rag.docs if doc.get("fonte")}),
-    }
+    try:
+        rag = _get_rag()
+        return {
+            "documentos": len(rag.docs),
+            "chunks": len(rag.chunks),
+            "arquivos": sorted({doc.get("fonte", "") for doc in rag.docs if doc.get("fonte")}),
+            "modo_recuperacao": os.getenv("RAG_MODE", "hibrido").strip().lower() or "hibrido",
+        }
+    except Exception as exc:
+        return {
+            "documentos": 0,
+            "chunks": 0,
+            "arquivos": [],
+            "erro": str(exc),
+            "modo_recuperacao": os.getenv("RAG_MODE", "hibrido").strip().lower() or "hibrido",
+        }
 
 
 def _frontend_setup_html() -> HTMLResponse:
