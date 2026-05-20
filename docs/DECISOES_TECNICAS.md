@@ -1,42 +1,137 @@
 # Decisões técnicas
 
-## 1. Uso de Streamlit
-Streamlit foi escolhido por permitir criar uma interface funcional rapidamente, com baixo custo de implementação e boa demonstração no vídeo.
+## 1. React no lugar de Streamlit
 
-## 2. Modo mock
-O modo mock permite desenvolver e testar o fluxo sem consumir tokens da API Gemma do LIA. A entrega final deve validar o funcionamento com `LLM_MODE=gemma`.
+A versão inicial em Streamlit era suficiente para prototipagem, mas limitada visualmente. A interface foi migrada para React para melhorar:
 
-## 3. RAG híbrido
-O RAG usa BM25 para busca lexical e FAISS com embeddings para busca semântica. A busca híbrida combina as duas pontuações para reduzir falhas quando a pergunta usa termos diferentes dos documentos.
+- apresentação;
+- responsividade;
+- organização das telas;
+- experiência de chat;
+- painel de evidências;
+- possibilidade de evoluir o projeto como portfólio.
 
-## 4. Chunking
-A versão otimizada usa chunks de aproximadamente 700 caracteres com sobreposição de 80. Essa escolha reduz consumo de tokens e preserva contexto suficiente para respostas curtas.
+---
 
-## 5. Tool calling
-A decisão de chamada é feita pela LLM. O Python apenas executa a ferramenta solicitada e registra entrada/saída no log.
+## 2. FastAPI como backend
 
-## 6. Segurança
-A chave da API fica no `.env`, que está no `.gitignore`. O arquivo `.env.example` contém apenas placeholders.
+FastAPI foi escolhido por ser leve, direto e compatível com deploy Docker.
 
-## 7. Testes
-Foram incluídos testes básicos para chunking e armazenamento. O objetivo é demonstrar engenharia mínima e reduzir risco de quebra em pontos centrais.
+Benefícios:
 
-## Decisão: fallback acadêmico com aviso de fonte
+- endpoints REST claros;
+- integração simples com frontend;
+- documentação automática;
+- boa performance;
+- facilidade para upload e diagnóstico.
 
-Foi decidido não deixar o modelo totalmente preso ao RAG nem totalmente livre. A arquitetura adotada usa o RAG como fonte primária e permite fallback geral somente quando a própria ferramenta de busca sinaliza falta de evidência.
+---
+
+## 3. Docker como padrão de deploy
+
+O Docker evita diferenças entre máquinas e ambientes de hospedagem.
+
+O mesmo projeto pode ser executado em:
+
+- máquina local;
+- Hugging Face Spaces;
+- Render;
+- VPS futura.
+
+---
+
+## 4. Variáveis de ambiente
+
+Configurações sensíveis foram isoladas:
+
+```env
+GEMMA_API_KEY
+GEMMA_BASE_URL
+GEMMA_MODEL
+LLM_MODE
+RAG_MODE
+```
+
+Isso evita vazar chaves no GitHub e permite trocar modos sem alterar código.
+
+---
+
+## 5. RAG híbrido e modo lexical
+
+O projeto suporta busca híbrida, mas também possui modo lexical.
 
 Motivo:
 
-- preservar o requisito central do trabalho, que é demonstrar RAG;
-- evitar respostas sem utilidade quando o conteúdo não está no dataset;
-- manter transparência para o usuário sobre a origem da resposta;
-- gerar evidência de tool calling nos logs mesmo em perguntas fora da base.
+- busca híbrida é mais robusta semanticamente;
+- busca lexical é mais leve para ambientes com pouca memória.
 
-Exemplo:
+Essa decisão permite adaptar o sistema ao ambiente sem remover funcionalidade.
+
+---
+
+## 6. Fallback acadêmico com transparência
+
+Quando o RAG não encontra evidência suficiente, o sistema não inventa fonte.
+
+Ele informa que não encontrou o tema nos materiais e só então usa conhecimento geral do modelo.
+
+Essa decisão melhora:
+
+- confiabilidade;
+- transparência;
+- experiência do aluno;
+- análise de erros.
+
+---
+
+## 7. Logs estruturados
+
+Cada chamada de ferramenta gera um log com entrada e saída.
+
+Motivo:
+
+- demonstrar tool calling;
+- facilitar debug;
+- fornecer evidência para avaliação;
+- permitir auditoria técnica.
+
+---
+
+## 8. Endpoint de diagnóstico da Gemma
+
+Foi criado:
 
 ```text
-Usuário: O que é heap?
-Sistema: chama buscar_material_rag.
-RAG: retorna resultado_vazio=true.
-JARVIS: responde com aviso de conhecimento geral e sugere importar material.
+/api/debug/gemma-ping
 ```
+
+Motivo:
+
+- isolar erro de API key;
+- diagnosticar timeout;
+- confirmar conectividade da hospedagem com a API LIA/UFMS;
+- separar problema da LLM de problema do agente/RAG.
+
+---
+
+## 9. Upload pelo chat e pelo painel de materiais
+
+O upload foi mantido no painel de materiais e também conectado ao clipe do composer.
+
+Motivo:
+
+- tornar a interação mais natural;
+- reduzir atrito para anexar PDF ou anotação;
+- deixar a aplicação mais próxima de um assistente real.
+
+---
+
+## 10. Painel de evidências em vez de JSON bruto
+
+O JSON bruto continua disponível, mas a tela principal exibe dados interpretados.
+
+Motivo:
+
+- facilitar correção;
+- destacar requisitos do trabalho;
+- demonstrar RAG, tool calling e fallback de forma clara.

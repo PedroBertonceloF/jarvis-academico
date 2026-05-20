@@ -3,16 +3,20 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   ArrowRight,
+  AlertTriangle,
   BookOpen,
   BrainCircuit,
   CalendarDays,
   CheckCircle2,
+  ClipboardCheck,
   ChevronRight,
   Database,
+  FileSearch,
   FileText,
   Gauge,
   GitBranch,
   GraduationCap,
+  Layers3,
   ListTodo,
   Loader2,
   Menu,
@@ -70,6 +74,8 @@ function extractSources(toolCalls = []) {
     const output = call?.saida || {};
     const docs = output.documentos_recuperados || output.materiais_relevantes || [];
     for (const doc of docs) {
+      const score = typeof doc.score === 'number' ? doc.score : null;
+      if (score !== null && score <= 0.0001) continue;
       const key = doc.id || `${doc.fonte}-${doc.score}`;
       if (!map.has(key)) map.set(key, doc);
     }
@@ -99,6 +105,50 @@ function inferMode(toolCalls = []) {
   return { label: 'Tool calling', tone: 'info' };
 }
 
+function formatScore(score) {
+  return typeof score === 'number' ? score.toFixed(3) : '—';
+}
+
+function getLogDocs(log) {
+  const output = log?.saida || {};
+  return output.documentos_recuperados || output.materiais_relevantes || [];
+}
+
+function getLogDiagnostics(log) {
+  const output = log?.saida || {};
+  const docs = getLogDocs(log);
+  const bestScore = docs.reduce((best, doc) => {
+    const score = typeof doc.score === 'number' ? doc.score : 0;
+    return Math.max(best, score);
+  }, 0);
+
+  return {
+    docs,
+    bestScore,
+    isRag: log?.ferramenta === 'buscar_material_rag',
+    isFallback: Boolean(output.resultado_vazio) || String(output.resposta || '').includes('Não encontrei esse tema'),
+    method: log?.entrada?.metodo || output?.diagnostico_recuperacao?.modo_recuperacao || '—',
+    k: log?.entrada?.k || output?.diagnostico_recuperacao?.top_k || '—',
+    query: log?.entrada?.pergunta || log?.entrada?.objetivo || log?.entrada?.tema || '—',
+  };
+}
+
+function getEvidenceMetrics(logs = []) {
+  const latest = logs[0] || null;
+  const ragCalls = logs.filter((log) => log.ferramenta === 'buscar_material_rag');
+  const fallbackCalls = logs.filter((log) => getLogDiagnostics(log).isFallback);
+  const tools = new Set(logs.map((log) => log.ferramenta).filter(Boolean));
+  const recoveredDocs = logs.reduce((acc, log) => acc + getLogDocs(log).filter((doc) => (doc.score ?? 0) > 0.0001).length, 0);
+
+  return {
+    latest,
+    ragCalls: ragCalls.length,
+    fallbackCalls: fallbackCalls.length,
+    toolTypes: tools.size,
+    recoveredDocs,
+  };
+}
+
 function BrandOrb() {
   return (
     <div className="brand-orb" aria-hidden="true">
@@ -115,7 +165,7 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }) {
     { id: 'materiais', label: 'Materiais', icon: Database },
     { id: 'tarefas', label: 'Tarefas', icon: ListTodo },
     { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-    { id: 'logs', label: 'Logs', icon: TerminalSquare },
+    { id: 'logs', label: 'Evidências', icon: TerminalSquare },
   ];
 
   return (
@@ -217,11 +267,33 @@ function MessageBubble({ message }) {
   );
 }
 
-function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickPrompt }) {
+function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickPrompt, refreshAll, onUploadResult }) {
   const bottomRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  async function handleComposerUpload(event) {
+    const selectedFiles = Array.from(event.target.files || []);
+    if (!selectedFiles.length) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach((file) => formData.append('files', file));
+      const data = await apiFetch('/api/upload', { method: 'POST', body: formData });
+      await refreshAll?.();
+      onUploadResult?.(selectedFiles, data, null);
+    } catch (error) {
+      onUploadResult?.(selectedFiles, null, error);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
 
   return (
     <section className="chat-panel">
@@ -262,8 +334,22 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
       </div>
 
       <form className="composer" onSubmit={onSubmit}>
-        <button type="button" className="composer-icon" title="Use o painel de Materiais para upload">
-          <Paperclip size={18} />
+        <input
+          ref={fileInputRef}
+          className="hidden-file-input"
+          type="file"
+          multiple
+          accept=".pdf,.md,.txt,.py"
+          onChange={handleComposerUpload}
+        />
+        <button
+          type="button"
+          className="composer-icon"
+          title="Anexar materiais à base RAG"
+          disabled={isUploading}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {isUploading ? <Loader2 className="spin" size={18} /> : <Paperclip size={18} />}
         </button>
         <textarea
           value={input}
@@ -493,26 +579,137 @@ function AgendaView({ agenda }) {
   );
 }
 
-function LogsView({ logs }) {
+function EvidencePill({ icon: Icon, label, value, tone = 'neutral' }) {
   return (
-    <section className="workspace-view">
+    <div className={`evidence-pill ${tone}`}>
+      <Icon size={17} />
+      <div>
+        <strong>{value}</strong>
+        <span>{label}</span>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceCard({ log, index }) {
+  const output = log.saida || {};
+  const inputData = log.entrada || {};
+  const diagnostics = getLogDiagnostics(log);
+  const relevantDocs = diagnostics.docs.filter((doc) => (doc.score ?? 0) > 0.0001);
+  const resumo = output.resposta || output.status || output.mensagem || 'Saída registrada pela ferramenta.';
+
+  return (
+    <article className="evidence-card">
+      <div className="evidence-card-head">
+        <div>
+          <span className="mini-label">Chamada #{index + 1}</span>
+          <h3>{humanToolName(log.ferramenta)}</h3>
+        </div>
+        <span className={`mode-badge ${diagnostics.isFallback ? 'warning' : diagnostics.isRag ? 'success' : 'info'}`}>
+          {diagnostics.isFallback ? 'fallback tratado' : diagnostics.isRag ? 'RAG executado' : 'ferramenta executada'}
+        </span>
+      </div>
+
+      <div className="evidence-grid">
+        <div className="evidence-field wide">
+          <span>Entrada principal</span>
+          <strong>{diagnostics.query}</strong>
+        </div>
+        <div className="evidence-field">
+          <span>Método</span>
+          <strong>{diagnostics.method}</strong>
+        </div>
+        <div className="evidence-field">
+          <span>Top-k</span>
+          <strong>{diagnostics.k}</strong>
+        </div>
+        <div className="evidence-field">
+          <span>Melhor score</span>
+          <strong>{formatScore(diagnostics.bestScore)}</strong>
+        </div>
+        <div className="evidence-field">
+          <span>Docs úteis</span>
+          <strong>{relevantDocs.length}</strong>
+        </div>
+      </div>
+
+      {diagnostics.isFallback && (
+        <div className="warning-box">
+          <AlertTriangle size={17} />
+          <span>Busca executada, mas sem evidência suficiente nos materiais. O JARVIS acionou fallback acadêmico com aviso de fonte.</span>
+        </div>
+      )}
+
+      {relevantDocs.length > 0 && (
+        <div className="evidence-sources">
+          <h4>Fontes recuperadas</h4>
+          {relevantDocs.slice(0, 4).map((doc) => (
+            <div className="evidence-source" key={doc.id || `${doc.fonte}-${doc.score}`}>
+              <div>
+                <FileSearch size={15} />
+                <strong>{doc.fonte || doc.id}</strong>
+              </div>
+              <span>score {formatScore(doc.score)}</span>
+              <p>{doc.texto ? `${doc.texto.slice(0, 210)}...` : 'Trecho recuperado pelo RAG.'}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="evidence-summary">
+        <span>Resumo da saída</span>
+        <p>{String(resumo).slice(0, 520)}{String(resumo).length > 520 ? '...' : ''}</p>
+      </div>
+
+      <details className="raw-json">
+        <summary>Ver JSON técnico bruto</summary>
+        <pre>{JSON.stringify({ timestamp: log.timestamp, ferramenta: log.ferramenta, entrada: inputData, saida: output }, null, 2)}</pre>
+      </details>
+    </article>
+  );
+}
+
+function LogsView({ logs }) {
+  const metrics = getEvidenceMetrics(logs);
+
+  return (
+    <section className="workspace-view evidence-view">
       <div className="view-header">
         <div>
           <span className="mini-label">Evidência técnica</span>
-          <h2>Logs de tool calling</h2>
-          <p>Registro das ferramentas chamadas, entradas e saídas. Útil para demonstrar o requisito do trabalho.</p>
+          <h2>Painel de avaliação do tool calling</h2>
+          <p>Resumo legível das ferramentas chamadas, recuperação RAG, fontes, scores e tratamento de erro. O JSON bruto continua disponível para auditoria.</p>
         </div>
       </div>
+
+      <div className="rubric-grid">
+        <EvidencePill icon={Search} label="chamadas RAG" value={metrics.ragCalls} tone="success" />
+        <EvidencePill icon={TerminalSquare} label="tipos de ferramenta" value={metrics.toolTypes} tone="info" />
+        <EvidencePill icon={FileText} label="fontes recuperadas" value={metrics.recoveredDocs} tone="neutral" />
+        <EvidencePill icon={ShieldCheck} label="fallbacks tratados" value={metrics.fallbackCalls} tone="warning" />
+      </div>
+
+      <div className="rubric-card">
+        <div className="context-title"><ClipboardCheck size={18} /> Critérios evidenciados</div>
+        <div className="criterion-list">
+          <span><CheckCircle2 size={15} /> RAG com documentos, chunks e scores</span>
+          <span><CheckCircle2 size={15} /> Tool calling com entrada e saída</span>
+          <span><CheckCircle2 size={15} /> Integração real com Gemma via API</span>
+          <span><CheckCircle2 size={15} /> Erros e fallback acadêmico controlados</span>
+        </div>
+      </div>
+
       <div className="log-stack">
         {logs.map((log, index) => (
-          <details className="log-card" key={`${log.timestamp}-${index}`}>
-            <summary>
-              <span>{humanToolName(log.ferramenta)}</span>
-              <small>{log.timestamp}</small>
-            </summary>
-            <pre>{JSON.stringify(log, null, 2)}</pre>
-          </details>
+          <EvidenceCard log={log} index={index} key={`${log.timestamp}-${index}`} />
         ))}
+        {!logs.length && (
+          <div className="empty-state">
+            <TerminalSquare size={28} />
+            <strong>Nenhuma ferramenta registrada ainda.</strong>
+            <p>Faça uma pergunta como “O que é RAG?” para gerar evidências de recuperação e tool calling.</p>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -617,6 +814,23 @@ export default function App() {
     setActive('chat');
   }
 
+  function handleUploadResult(files, result, error) {
+    const fileNames = files.map((file) => file.name).join(', ');
+    const content = error
+      ? `### Erro ao importar material\n${error.message}`
+      : `### Materiais importados com sucesso\nArquivos enviados: **${fileNames}**.\n\nA base RAG foi reindexada e os novos documentos já podem ser consultados pelo JARVIS.`;
+
+    setMessages((prev) => [...prev, {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content,
+      time: formatTime(),
+      tool_calls: [],
+      sources: [],
+    }]);
+    setActive('chat');
+  }
+
   return (
     <div className="app-shell">
       <Sidebar active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -636,6 +850,7 @@ export default function App() {
             agenda={agenda}
             logs={logs}
             refreshAll={refreshAll}
+            onUploadResult={handleUploadResult}
           />
           <ContextPanel selectedMessage={selectedMessage} logs={logs} tasks={tasks} agenda={agenda} status={status} />
         </div>

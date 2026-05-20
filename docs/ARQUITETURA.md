@@ -1,86 +1,232 @@
-# Arquitetura — JARVIS Acadêmico
+# Arquitetura do JARVIS Acadêmico
 
 ## Visão geral
 
+O JARVIS Acadêmico é uma aplicação web com arquitetura cliente-servidor:
+
 ```text
-Usuário
-  ↓
-Interface Streamlit / CLI
-  ↓
-JarvisAgent
-  ↓
-GemmaClient decide ferramentas
-  ↓
-ToolRegistry executa ferramentas
-  ├── Agenda JSON
-  ├── Tarefas JSON
-  ├── RAG: documentos → chunks → BM25 + embeddings + FAISS
-  └── Planejamento / exercícios
-  ↓
-Logger registra entrada e saída
-  ↓
-Resposta final ao usuário
+Frontend React
+  │ HTTP/JSON
+  ▼
+Backend FastAPI
+  ├── Agente acadêmico
+  ├── Cliente LLM Gemma/mock
+  ├── Tool calling
+  ├── RAG
+  ├── Storage
+  └── Logs
 ```
 
-## Módulos principais
+O objetivo arquitetural é separar interface, lógica de agente, recuperação de informação e persistência.
 
-- `src/config.py`: carrega variáveis de ambiente e caminhos do projeto.
-- `src/llm_client.py`: encapsula acesso à Gemma e modo mock.
-- `src/rag.py`: carrega documentos, faz chunking, cria índices BM25/FAISS e responde perguntas.
-- `src/tools.py`: define e executa ferramentas disponíveis para o agente.
-- `src/agent.py`: usa a LLM para decidir tool calling e montar a resposta final.
-- `src/storage.py`: gerencia agenda e tarefas em JSON.
-- `src/logger.py`: registra chamadas de ferramentas em `logs/tool_calls.jsonl`.
-- `app.py`: interface Streamlit.
-- `main.py`: interface por terminal.
+---
 
-## Decisões de arquitetura
-O projeto usa módulos profundos com interfaces simples. O agente não precisa conhecer detalhes internos do RAG, da agenda ou das tarefas; ele apenas chama ferramentas com argumentos estruturados.
+## Frontend
 
-## Modos de execução
-- `LLM_MODE=mock`: desenvolvimento sem consumo de tokens.
-- `LLM_MODE=gemma`: validação real usando Gemma 12B via API.
-
-
-## Upload de documentos
-
-A interface Streamlit usa `st.file_uploader` para receber arquivos `.pdf`, `.md`, `.txt` e `.py`. Os arquivos são salvos em `data/uploads/`. Após salvar, o cache do RAG e do agente é limpo para forçar nova indexação dos materiais.
-
-## Fallback acadêmico com governança
-
-Foi adicionada uma camada de transparência para perguntas acadêmicas fora da base local. O objetivo é evitar dois problemas comuns em sistemas RAG:
-
-1. o assistente parecer incapaz quando o tema não está nos documentos;
-2. o assistente responder com conhecimento geral fingindo que usou os materiais.
-
-O fluxo é:
+Local:
 
 ```text
-Pergunta acadêmica → buscar_material_rag → diagnóstico de relevância
-                                      ↓
-                    evidência suficiente? sim → resposta baseada no RAG
-                                      ↓ não
-                    RESULTADO_VAZIO → resposta geral com aviso de fonte
+frontend/
 ```
 
-O diagnóstico de relevância considera a sobreposição de termos relevantes da pergunta com o contexto recuperado e a similaridade densa bruta. Isso é necessário porque o score híbrido é normalizado e pode parecer alto mesmo quando o tema está fora da base.
+Tecnologias:
 
-## Camada web FastAPI
+- React;
+- Vite;
+- React Markdown;
+- lucide-react;
+- CSS customizado.
 
-A versão premium adiciona uma camada web independente do Streamlit:
+Responsabilidades:
+
+- chat acadêmico;
+- upload de documentos;
+- visualização de fontes;
+- tarefas;
+- agenda;
+- painel de evidências técnicas;
+- exibição de erros controlados.
+
+---
+
+## Backend
+
+Local:
 
 ```text
-frontend/index.html
-frontend/assets/styles.css
-frontend/assets/app.js
-        ↓ fetch()
 web_api/main.py
-        ↓
-src/agent.py + src/tools.py + src/rag.py
 ```
 
-Essa separação permite publicar o projeto online mantendo a lógica principal isolada em módulos profundos. O frontend não acessa diretamente a chave da Gemma; todas as chamadas sensíveis passam pelo backend FastAPI.
+Tecnologia:
 
-## Por que não usar apenas GitHub Pages?
+- FastAPI;
+- Uvicorn;
+- Docker.
 
-GitHub Pages é adequado para frontend estático. Porém, este projeto precisa executar Python, carregar embeddings, manter storage local, processar uploads, chamar ferramentas e conversar com a API Gemma. Por isso, para uma versão funcional online, é necessário um backend Python hospedado em serviço compatível com ASGI/FastAPI.
+Responsabilidades:
+
+- servir API REST;
+- servir frontend compilado;
+- receber upload de arquivos;
+- expor status do sistema;
+- expor logs;
+- diagnosticar Gemma;
+- integrar agente, RAG, ferramentas e storage.
+
+---
+
+## Agente
+
+Local:
+
+```text
+src/agent.py
+```
+
+Responsabilidades:
+
+- receber a mensagem do usuário;
+- decidir ferramentas;
+- executar tool calling;
+- montar resposta final;
+- tratar fallback acadêmico;
+- retornar resposta, fontes e logs para a interface.
+
+---
+
+## LLM
+
+Local:
+
+```text
+src/llm_client.py
+```
+
+Modos:
+
+| Modo | Função |
+|---|---|
+| `gemma` | Usa a API Gemma 12B fornecida. |
+| `mock` | Simula resposta para testes sem consumo de API. |
+
+Variáveis principais:
+
+```env
+LLM_MODE=gemma
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
+GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_API_KEY=...
+GEMMA_TIMEOUT_SECONDS=180
+GEMMA_MAX_TOKENS=512
+```
+
+---
+
+## RAG
+
+Local:
+
+```text
+src/rag.py
+```
+
+Base:
+
+```text
+data/
+data/uploads/
+```
+
+Estratégias:
+
+| Modo | Descrição |
+|---|---|
+| `lexical` | Recuperação por BM25/palavras-chave. |
+| `hibrido` | Combinação de busca lexical e embeddings. |
+
+Fluxo:
+
+```text
+Documento → chunking → indexação → recuperação → contexto → resposta
+```
+
+---
+
+## Tool calling
+
+Local:
+
+```text
+src/tools.py
+```
+
+Ferramentas principais:
+
+- `buscar_material_rag`;
+- `planejar_estudos`;
+- `gerar_exercicios`;
+- `listar_tarefas`;
+- `adicionar_tarefa`;
+- `concluir_tarefa`;
+- `consultar_agenda`.
+
+Cada chamada é registrada com:
+
+- timestamp;
+- nome da ferramenta;
+- entrada;
+- saída;
+- documentos recuperados, quando aplicável.
+
+---
+
+## Logs e evidências
+
+Local:
+
+```text
+src/logger.py
+logs/
+```
+
+A interface transforma logs técnicos em evidências legíveis:
+
+- ferramenta executada;
+- entrada principal;
+- método de recuperação;
+- top-k;
+- melhor score;
+- documentos recuperados;
+- fallback acadêmico;
+- JSON bruto.
+
+---
+
+## Deploy
+
+### Hugging Face Spaces
+
+Recomendado para rodar o projeto completo com Docker.
+
+Porta padrão:
+
+```text
+7860
+```
+
+### Render
+
+Também suportado, mas pode exigir `RAG_MODE=lexical` em planos gratuitos por limite de memória.
+
+---
+
+## Segurança
+
+Segredos não ficam versionados.
+
+A `GEMMA_API_KEY` deve ser configurada em:
+
+- `.env` local; ou
+- Secrets do Hugging Face.
+
+Nunca deve ser colocada no código ou no README.
