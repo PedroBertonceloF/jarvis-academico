@@ -1,3 +1,12 @@
+---
+title: JARVIS Acadêmico
+emoji: 🧠
+colorFrom: indigo
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+---
 # JARVIS Acadêmico — Assistente Inteligente para Estudantes
 
 Projeto prático da disciplina de Inteligência Artificial.
