@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from src.agent import JarvisAgent
 from src.config import settings
+from src.llm_client import GemmaClient
 from src.rag import RagEngine, SUPPORTED_EXTENSIONS
 from src.storage import AgendaStore, EventoAgenda, Tarefa, TarefaStore, inicializar_dados_demo
 from src.tools import ToolRegistry
@@ -175,6 +177,45 @@ def status() -> dict[str, Any]:
         "usando_mock": settings.usando_mock,
         "base_rag": _resumo_base(),
         "uploads_dir": str(UPLOADS_DIR.relative_to(ROOT_DIR)),
+    }
+
+
+@app.get("/api/debug/gemma-ping")
+def debug_gemma_ping(prompt: str = Query("Responda apenas: OK", min_length=1, max_length=200)) -> dict[str, Any]:
+    """Diagnóstico direto da Gemma: não usa RAG, agente nem tool calling."""
+    inicio = time.perf_counter()
+    try:
+        resultado = GemmaClient().ping(prompt=prompt)
+        resultado["elapsed_total_seconds"] = round(time.perf_counter() - inicio, 3)
+        return resultado
+    except Exception as exc:
+        return {
+            "ok": False,
+            "tipo_erro": exc.__class__.__name__,
+            "mensagem": str(exc),
+            "elapsed_total_seconds": round(time.perf_counter() - inicio, 3),
+            "modo_llm": settings.llm_mode,
+            "base_url_configurada": bool(str(settings.gemma_base_url or "").strip()),
+            "model": str(settings.gemma_model or "").strip(),
+            "api_key_presente": bool(str(settings.gemma_api_key or "").strip()),
+            "timeout_seconds": os.getenv("GEMMA_TIMEOUT_SECONDS", "180"),
+            "max_tokens": os.getenv("GEMMA_MAX_TOKENS", "512"),
+        }
+
+
+@app.get("/api/debug/config")
+def debug_config() -> dict[str, Any]:
+    """Mostra configuração efetiva sem expor segredos."""
+    return {
+        "modo_llm": settings.llm_mode,
+        "usando_mock": settings.usando_mock,
+        "gemma_base_url_presente": bool(str(settings.gemma_base_url or "").strip()),
+        "gemma_model": str(settings.gemma_model or "").strip(),
+        "gemma_api_key_presente": bool(str(settings.gemma_api_key or "").strip()),
+        "gemma_timeout_seconds": os.getenv("GEMMA_TIMEOUT_SECONDS", "180"),
+        "gemma_max_tokens": os.getenv("GEMMA_MAX_TOKENS", "512"),
+        "rag_mode": os.getenv("RAG_MODE", "hibrido"),
+        "base_rag": _resumo_base(),
     }
 
 

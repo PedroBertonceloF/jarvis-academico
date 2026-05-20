@@ -1,40 +1,130 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import time
 from datetime import date
 from typing import Any
 
-from openai import OpenAI
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AuthenticationError,
+    OpenAI,
+)
 
 from .config import settings
+
+
+def _limpar_env(valor: str | None) -> str:
+    """Remove espaços, quebras de linha e aspas acidentais vindas do painel de deploy."""
+    return str(valor or "").strip().strip("\'").strip('"').strip()
+
+
+def _env_int(nome: str, padrao: int) -> int:
+    try:
+        return int(_limpar_env(os.getenv(nome)) or padrao)
+    except (TypeError, ValueError):
+        return padrao
 
 
 class GemmaClient:
     """Cliente OpenAI-compatible para o Gemma 12B exigido no trabalho.
 
-    Para desenvolvimento local sem o token do professor, use LLM_MODE=mock no .env.
-    O modo mock não substitui a entrega final: ele apenas permite testar fluxo, RAG,
-    agenda, tarefas, logs e interface enquanto o token oficial não chega.
+    Também oferece diagnóstico de conectividade para deploy online.
+    Variáveis úteis:
+    - GEMMA_TIMEOUT_SECONDS: tempo máximo de chamada à API.
+    - GEMMA_MAX_TOKENS: limite superior de tokens por resposta.
     """
 
     def __init__(self) -> None:
         settings.validate_llm()
-        self.model = settings.gemma_model
+        self.model = _limpar_env(settings.gemma_model)
         self.mock = settings.usando_mock
-        self.client = None if self.mock else OpenAI(base_url=settings.gemma_base_url, api_key=settings.gemma_api_key)
+        self.base_url = _limpar_env(settings.gemma_base_url)
+        self.api_key = _limpar_env(settings.gemma_api_key)
+        self.timeout_seconds = _env_int("GEMMA_TIMEOUT_SECONDS", 180)
+        self.max_tokens_limit = _env_int("GEMMA_MAX_TOKENS", 512)
+
+        self.client = None
+        if not self.mock:
+            self.client = OpenAI(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                timeout=self.timeout_seconds,
+                max_retries=0,
+            )
 
     def chat(self, messages: list[dict[str, str]], temperature: float = 0.2, max_tokens: int = 350) -> str:
         if self.mock:
             return self._chat_mock(messages)
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
+        efetivo_max_tokens = max(1, min(int(max_tokens), int(self.max_tokens_limit)))
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=efetivo_max_tokens,
+                timeout=self.timeout_seconds,
+            )
+            return response.choices[0].message.content or ""
+        except APITimeoutError as exc:
+            raise TimeoutError(
+                f"Timeout ao chamar Gemma após {self.timeout_seconds}s. "
+                "A API externa não respondeu dentro do limite configurado."
+            ) from exc
+        except AuthenticationError as exc:
+            raise PermissionError(
+                "Token da Gemma inválido ou recusado pela API. "
+                "Confira o Secret GEMMA_API_KEY, sem aspas e sem 'GEMMA_API_KEY=' no valor."
+            ) from exc
+        except APIConnectionError as exc:
+            raise ConnectionError(
+                "Falha de conexão com a API Gemma. "
+                "Confira se o ambiente online consegue acessar GEMMA_BASE_URL."
+            ) from exc
+        except APIStatusError as exc:
+            raise RuntimeError(
+                f"Erro HTTP da API Gemma: status={exc.status_code}, resposta={exc.response.text[:500]}"
+            ) from exc
+
+    def ping(self, prompt: str = "Responda apenas: OK") -> dict[str, Any]:
+        """Teste direto da Gemma, sem RAG, sem tool calling e sem agente."""
+        inicio = time.perf_counter()
+
+        if self.mock:
+            return {
+                "ok": True,
+                "modo": "mock",
+                "resposta": "OK MOCK",
+                "elapsed_seconds": round(time.perf_counter() - inicio, 3),
+                "base_url": self.base_url,
+                "model": self.model,
+                "api_key_presente": bool(self.api_key),
+                "timeout_seconds": self.timeout_seconds,
+                "max_tokens_limit": self.max_tokens_limit,
+            }
+
+        resposta = self.chat(
+            [{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=min(20, self.max_tokens_limit),
         )
-        return response.choices[0].message.content or ""
+        return {
+            "ok": True,
+            "modo": "gemma",
+            "resposta": resposta,
+            "elapsed_seconds": round(time.perf_counter() - inicio, 3),
+            "base_url": self.base_url,
+            "model": self.model,
+            "api_key_presente": bool(self.api_key),
+            "timeout_seconds": self.timeout_seconds,
+            "max_tokens_limit": self.max_tokens_limit,
+        }
 
     def _chat_mock(self, messages: list[dict[str, str]]) -> str:
         ultimo = messages[-1].get("content", "") if messages else ""
