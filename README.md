@@ -8,171 +8,389 @@ app_port: 7860
 pinned: false
 ---
 
-# JARVIS Acadêmico
 
-Assistente acadêmico com **RAG**, **integração com LLM Gemma 12B** e **tool calling**, desenvolvido para apoiar estudantes na organização dos estudos, consulta a materiais, geração de exercícios e planejamento de rotina acadêmica.
+# JARVIS Acadêmico — Assistente com RAG, Gemma 12B e Tool Calling
 
-O projeto foi construído como uma aplicação web completa, com frontend em React, backend em FastAPI, deploy via Docker e controle de configuração por variáveis de ambiente.
+Projeto prático da disciplina de **Inteligência Artificial — FACOM/UFMS**.
+
+O **JARVIS Acadêmico** é um assistente pessoal acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos da disciplina. O sistema combina **RAG**, **integração com LLM Gemma 12B**, **tool calling**, upload de documentos, planejamento de estudos, geração de exercícios e painel técnico de evidências.
+
+## Link do projeto online
+
+O projeto está disponível no Hugging Face Spaces:
+
+https://huggingface.co/spaces/TeoZ08/jarvis-academico
+
 
 ---
 
 ## 1. Objetivo do projeto
 
-O JARVIS Acadêmico funciona como um copiloto de estudos. Ele consegue:
+O objetivo do JARVIS Acadêmico é atuar como um copiloto de estudos para alunos de Computação, com foco em:
 
-- responder dúvidas com base em materiais cadastrados;
-- recuperar fontes e chunks relevantes usando RAG;
-- chamar ferramentas internas para tarefas, agenda, planejamento e geração de exercícios;
-- registrar logs técnicos de tool calling;
-- tratar erros e ausência de evidência com fallback acadêmico transparente;
-- importar novos documentos para a base de conhecimento.
+- responder dúvidas sobre conteúdos acadêmicos;
+- consultar materiais cadastrados por meio de RAG;
+- gerar planos de estudo;
+- sugerir exercícios;
+- registrar evidências técnicas de tool calling;
+- demonstrar integração real com uma LLM obrigatória;
+- apoiar o aprendizado de forma transparente e rastreável.
 
----
+O projeto foi desenvolvido com foco nos critérios avaliativos do trabalho:
 
-## 2. Requisitos atendidos
-
-| Requisito do trabalho | Implementação no projeto |
-|---|---|
-| RAG | Recuperação em base local com documentos, chunks, scores e fontes exibidas na interface. |
-| Integração com LLM | Uso da API compatível com OpenAI fornecida para o modelo `google/gemma-3-12b-it`. |
-| Tool calling | Ferramentas internas chamadas dinamicamente e registradas em logs. |
-| Avaliação e erros | Fallback acadêmico, erros controlados, endpoint de diagnóstico e painel de evidências. |
-| Aprendizado | Explicações didáticas, geração de exercícios, plano de estudos e apoio ao aluno. |
-| Engenharia | React, FastAPI, Docker, testes, Git, deploy online e documentação técnica. |
-
----
-
-## 3. Arquitetura
-
-```text
-Usuário
-  │
-  ▼
-Frontend React/Vite
-  │
-  ▼
-Backend FastAPI
-  ├── Agente acadêmico
-  ├── Cliente LLM Gemma
-  ├── Ferramentas internas
-  ├── RAG / Retrieval
-  ├── Storage de tarefas e agenda
-  └── Logs técnicos
-```
-
-### Principais módulos
-
-| Caminho | Função |
-|---|---|
-| `frontend/src/App.jsx` | Interface principal em React. |
-| `frontend/src/styles.css` | Estilo visual da aplicação. |
-| `web_api/main.py` | API HTTP em FastAPI. |
-| `src/agent.py` | Coordenação entre usuário, LLM e ferramentas. |
-| `src/llm_client.py` | Cliente da LLM Gemma/mock e diagnóstico. |
-| `src/rag.py` | Indexação, recuperação e fallback RAG. |
-| `src/tools.py` | Ferramentas chamadas pelo agente. |
-| `src/storage.py` | Persistência local de tarefas e agenda. |
-| `src/logger.py` | Registro de chamadas de ferramentas. |
-| `data/` | Documentos base da disciplina. |
-| `data/uploads/` | Documentos enviados pelo usuário. |
-| `docs/` | Documentação técnica e análise de erros. |
+| Critério | Peso |
+|---|---:|
+| Funcionalidade | 20% |
+| RAG | 20% |
+| Tool calling | 15% |
+| Avaliação + erros | 20% |
+| Aprendizado | 15% |
+| Engenharia | 10% |
 
 ---
 
-## 4. Funcionalidades principais
+## 2. Funcionalidades principais
 
 ### Chat acadêmico
 
-O usuário conversa com o JARVIS e recebe respostas em Markdown, com formatação adequada para listas, títulos, código e explicações.
+O usuário pode conversar com o JARVIS sobre temas da disciplina de Inteligência Artificial e sobre conceitos gerais de Computação.
 
-### RAG
+Exemplos de perguntas:
 
-O sistema recupera documentos relevantes da base de conhecimento e apresenta:
+```text
+O que é RAG?
+Explique regressão logística.
+O que é heap?
+Monte um plano de estudos para a prova de IA.
+Gere 3 exercícios sobre embeddings.
+```
 
-- arquivos utilizados;
-- chunks recuperados;
-- score de relevância;
-- método de recuperação;
-- diagnóstico quando não há evidência suficiente.
+### RAG com fontes
 
-### Fallback acadêmico com governança
+O sistema recupera trechos dos materiais cadastrados e usa esses trechos como contexto para a resposta da LLM.
 
-Quando a busca não encontra evidência suficiente nos materiais, o JARVIS informa explicitamente:
+A interface exibe:
 
-> Não encontrei esse tema nos materiais cadastrados. Vou responder com meu conhecimento geral da base de dados do modelo.
-
-Isso evita confundir resposta baseada em fonte local com resposta de conhecimento geral da LLM.
-
-### Upload de materiais
-
-O usuário pode anexar arquivos pelo painel **Materiais** ou pelo clipe do chat. Formatos suportados:
-
-- `.pdf`
-- `.md`
-- `.txt`
-- `.py`
-
-Após o upload, a base RAG é reindexada.
-
-### Tarefas e agenda
-
-O sistema possui ferramentas para listar, adicionar e concluir tarefas, além de consultar agenda acadêmica.
-
-### Painel de evidências técnicas
-
-A aba **Evidências** mostra dados úteis para avaliação:
-
-- ferramenta chamada;
-- entrada principal;
-- método usado;
-- top-k;
-- melhor score;
 - fontes recuperadas;
-- fallback tratado;
-- JSON bruto para auditoria.
+- score de similaridade;
+- chunks utilizados;
+- método de recuperação;
+- evidência de uso do RAG.
+
+### Upload de documentos
+
+O usuário pode anexar documentos pela interface.
+
+Formatos previstos:
+
+- `.md`;
+- `.txt`;
+- `.pdf`.
+
+Os arquivos enviados são processados, divididos em chunks e incorporados ao mecanismo de busca do RAG.
+
+### Tool calling
+
+O sistema possui ferramentas internas que podem ser chamadas pelo agente, como:
+
+- busca em materiais via RAG;
+- planejamento de estudos;
+- listagem de tarefas;
+- consulta de agenda;
+- geração de exercícios;
+- diagnóstico da Gemma.
+
+Cada chamada de ferramenta é registrada no painel de evidências técnicas.
+
+### Fallback acadêmico
+
+Quando o tema perguntado não aparece nos materiais cadastrados, o sistema não inventa fonte.
+
+Ele informa que não encontrou o tema no dataset e responde com conhecimento geral do modelo, sinalizando a origem da resposta.
+
+Exemplo:
+
+```text
+Não encontrei esse tema nos materiais cadastrados.
+Vou responder com meu conhecimento geral da base de dados do modelo.
+```
+
+Esse comportamento melhora a transparência e reduz o risco de alucinação.
 
 ---
 
-## 5. Como rodar localmente
+## 3. Origem dos dados do dataset
 
-### 5.1. Clonar o repositório
+O dataset inicial do JARVIS Acadêmico é composto por documentos locais em formato Markdown, armazenados na pasta `data/`.
+
+Esses documentos foram criados manualmente para representar conteúdos centrais da disciplina de Inteligência Artificial, incluindo:
+
+- RAG;
+- BM25;
+- embeddings;
+- FAISS;
+- KNN;
+- normalização;
+- gradiente descendente;
+- regressão linear;
+- regressão logística;
+- tool calling.
+
+Além da base inicial, o sistema permite que o usuário importe novos materiais acadêmicos pela interface web. Esses arquivos são salvos localmente, processados em chunks e incorporados ao mecanismo de recuperação.
+
+Portanto, os dados utilizados pelo sistema têm origem **local, controlada e expansível**.
+
+O JARVIS não coleta dados automaticamente da internet. A base de conhecimento é formada por materiais previamente cadastrados no projeto e por documentos adicionados pelo próprio usuário.
+
+---
+
+## 4. Arquitetura do sistema
+
+A arquitetura geral é composta por:
+
+```text
+Frontend React
+      ↓
+Backend FastAPI
+      ↓
+Agente acadêmico
+      ↓
+Tool calling
+      ↓
+RAG + Agenda + Tarefas + Exercícios
+      ↓
+Gemma 12B via API
+```
+
+### Componentes principais
+
+| Componente | Função |
+|---|---|
+| `frontend/` | Interface web em React |
+| `web_api/` | API FastAPI usada pelo frontend |
+| `src/agent.py` | Orquestra o comportamento do assistente |
+| `src/llm_client.py` | Integração com a API Gemma |
+| `src/rag.py` | Indexação e recuperação dos documentos |
+| `src/tools.py` | Ferramentas chamadas pelo agente |
+| `data/` | Dataset acadêmico inicial |
+| `docs/` | Documentação técnica |
+| `tests/` | Testes automatizados |
+
+---
+
+## 5. RAG
+
+O projeto implementa RAG para recuperar trechos relevantes antes de gerar respostas.
+
+O pipeline é:
+
+```text
+Documento
+   ↓
+Chunking
+   ↓
+Indexação
+   ↓
+Busca lexical / híbrida
+   ↓
+Recuperação dos trechos relevantes
+   ↓
+Prompt com contexto
+   ↓
+Resposta gerada pela LLM
+```
+
+### Estratégias de recuperação
+
+O sistema foi preparado para trabalhar com:
+
+- busca lexical;
+- BM25;
+- embeddings;
+- FAISS;
+- recuperação híbrida.
+
+No ambiente online, a configuração pode ser ajustada por variável de ambiente:
+
+```env
+RAG_MODE=hibrido
+```
+
+ou, em ambientes com pouca memória:
+
+```env
+RAG_MODE=lexical
+```
+
+---
+
+## 6. Integração com LLM
+
+A LLM obrigatória utilizada é:
+
+```text
+Gemma 12B
+```
+
+Modelo configurado:
+
+```env
+GEMMA_MODEL=google/gemma-3-12b-it
+```
+
+URL da API:
+
+```env
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
+```
+
+A chave de API deve ser configurada em variável de ambiente ou secret:
+
+```env
+GEMMA_API_KEY=sua_chave_aqui
+```
+
+
+---
+
+## 7. Tool calling
+
+O sistema implementa tool calling para permitir que a LLM acione ferramentas internas.
+
+Exemplos de ferramentas:
+
+| Ferramenta | Função |
+|---|---|
+| `buscar_material_rag` | Busca trechos relevantes nos materiais |
+| `planejar_estudos` | Gera plano de estudos |
+| `listar_tarefas` | Consulta tarefas acadêmicas |
+| `consultar_agenda` | Consulta compromissos simulados |
+| `gerar_exercicios` | Cria exercícios com base nos conteúdos |
+
+A aba **Evidências Técnicas** mostra:
+
+- ferramenta chamada;
+- entrada da ferramenta;
+- saída resumida;
+- fontes recuperadas;
+- scores;
+- fallback;
+- JSON técnico bruto.
+
+Essa tela foi criada para facilitar a correção do requisito de tool calling.
+
+---
+
+## 8. Avaliação, erros e governança
+
+O projeto possui tratamento controlado para diferentes situações:
+
+### Tema fora do dataset
+
+Quando a busca não encontra evidência suficiente, o sistema usa fallback acadêmico com aviso explícito.
+
+### Token inválido
+
+Quando a chave da Gemma está incorreta, o sistema retorna erro controlado.
+
+### Timeout
+
+O sistema possui variáveis para controlar tempo máximo de espera:
+
+```env
+GEMMA_TIMEOUT_SECONDS=180
+```
+
+### Limite de tokens
+
+A quantidade máxima de tokens da resposta pode ser ajustada:
+
+```env
+GEMMA_MAX_TOKENS=512
+```
+
+### Diagnóstico da Gemma
+
+Foi criado um endpoint de diagnóstico:
+
+```text
+/api/debug/gemma-ping
+```
+
+Esse endpoint testa a comunicação direta com a Gemma sem passar pelo fluxo completo do agente.
+
+Exemplo de retorno esperado:
+
+```json
+{
+  "ok": true,
+  "modo": "gemma",
+  "resposta": "OK",
+  "api_key_presente": true
+}
+```
+
+---
+
+## 9. Como executar localmente
+
+### Pré-requisitos
+
+- Python 3.12+
+- Node.js
+- npm
+- Git
+
+### Clonar o projeto
 
 ```bash
 git clone https://github.com/TeoZ08/jarvis-academico.git
 cd jarvis-academico
 ```
 
-### 5.2. Criar ambiente Python
+### Criar ambiente virtual
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+### Instalar dependências Python
+
+```bash
 pip install --upgrade pip
 pip install -r requirements_cpu.txt
 ```
 
-### 5.3. Configurar variáveis de ambiente
+Se necessário:
 
-Crie um arquivo `.env` na raiz do projeto:
+```bash
+pip install -r requirements.txt
+```
+
+### Criar arquivo `.env`
+
+Na raiz do projeto:
+
+```bash
+nano .env
+```
+
+Exemplo:
 
 ```env
 LLM_MODE=gemma
 GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
 GEMMA_MODEL=google/gemma-3-12b-it
-GEMMA_API_KEY=SUA_CHAVE_AQUI
+GEMMA_API_KEY=sua_chave_aqui
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
 RAG_MODE=hibrido
+EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 PYTHONUNBUFFERED=1
 ```
 
-Para modo de teste sem consumir API:
-
-```env
-LLM_MODE=mock
-```
-
-### 5.4. Rodar backend
+### Rodar backend
 
 ```bash
 python -m uvicorn web_api.main:app --reload
@@ -184,7 +402,7 @@ Backend local:
 http://127.0.0.1:8000
 ```
 
-### 5.5. Rodar frontend
+### Rodar frontend
 
 Em outro terminal:
 
@@ -202,79 +420,66 @@ http://localhost:5173
 
 ---
 
-## 6. Como testar
+## 10. Como testar
 
-### Testes automatizados
-
-```bash
-python -m compileall -q src web_api app.py main.py
-python -m pytest
-```
-
-### Diagnóstico da Gemma
+### Teste de status
 
 ```text
-/api/debug/gemma-ping
+http://127.0.0.1:8000/api/status
 ```
 
-Resposta esperada:
-
-```json
-{
-  "ok": true,
-  "modo": "gemma",
-  "resposta": "OK"
-}
-```
-
-### Diagnóstico de configuração
+### Teste direto da Gemma
 
 ```text
-/api/debug/config
+http://127.0.0.1:8000/api/debug/gemma-ping
 ```
 
-Esse endpoint informa modo da LLM, presença de chave e parâmetros sem expor segredos.
+### Testes no chat
 
-### Perguntas recomendadas para validação
+```text
+Responda apenas: OK
+```
 
 ```text
 O que é RAG?
 ```
 
-Deve acionar RAG e apresentar fontes.
-
 ```text
 O que é heap?
 ```
-
-Deve acionar busca, detectar ausência de evidência suficiente e usar fallback acadêmico.
 
 ```text
 Monte um plano de estudos para a prova de IA.
 ```
 
-Deve usar ferramentas de planejamento, tarefas e agenda.
-
 ```text
 Gere 3 exercícios sobre embeddings.
 ```
 
-Deve gerar exercício didático ligado ao conteúdo acadêmico.
-
 ---
 
-## 7. Deploy
+## 11. Deploy
+
+O projeto foi preparado para deploy com Docker.
 
 ### Hugging Face Spaces
 
-O projeto está preparado para Docker Spaces. O cabeçalho YAML deste README informa:
+O projeto está publicado em:
+
+```text
+https://huggingface.co/spaces/TeoZ08/jarvis-academico
+```
+
+O Space utiliza:
 
 ```yaml
 sdk: docker
 app_port: 7860
 ```
 
-Variáveis recomendadas no Space:
+### Variáveis recomendadas no Hugging Face
+
+Variables:
 
 ```env
 LLM_MODE=gemma
@@ -283,125 +488,136 @@ GEMMA_MODEL=google/gemma-3-12b-it
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
 RAG_MODE=hibrido
+EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 PYTHONUNBUFFERED=1
 ```
 
-Secret obrigatório:
+Secret:
 
 ```env
-GEMMA_API_KEY=SUA_CHAVE_AQUI
+GEMMA_API_KEY=sua_chave_aqui
 ```
 
-A chave deve ficar em **Secrets**, não em variável pública.
+A chave deve ser colocada em **Secrets**, não em Variables.
 
-### Render
+---
 
-O projeto também possui arquivos de deploy para Render:
+## 12. Segurança
 
-- `Dockerfile`
-- `render.yaml`
-- `Procfile`
-- `runtime.txt`
+Arquivos e informações que não devem ser versionados:
 
-Em ambientes gratuitos com pouca memória, recomenda-se usar:
-
-```env
-RAG_MODE=lexical
+```text
+.env
+GEMMA_API_KEY
+HF_TOKEN
+tokens pessoais
+chaves privadas
 ```
 
----
+O arquivo `.gitignore` deve impedir o envio de arquivos sensíveis.
 
-## 8. Ferramentas e bibliotecas utilizadas
+A chave da Gemma deve ser usada apenas via:
 
-### Desenvolvimento
-
-- Python
-- FastAPI
-- Uvicorn
-- React
-- Vite
-- Docker
-- Git/GitHub
-- Hugging Face Spaces
-- Render
-
-### IA/RAG
-
-- OpenAI Python SDK compatível com API LIA/UFMS
-- Gemma 12B (`google/gemma-3-12b-it`)
-- Sentence Transformers
-- FAISS CPU
-- BM25 / `rank_bm25`
-- scikit-learn
-- pandas
-- numpy
-
-### Interface
-
-- React Markdown
-- remark-gfm
-- lucide-react
+- `.env` local; ou
+- Secrets do Hugging Face.
 
 ---
 
-## 9. Decisões técnicas importantes
+## 13. Ferramentas e tecnologias utilizadas
 
-### Separação frontend/backend
-
-O frontend React é independente do backend FastAPI. Isso melhora a manutenção e permite deploy moderno.
-
-### Variáveis de ambiente
-
-Chaves e configurações ficam fora do código. A API key da Gemma nunca deve ser commitada.
-
-### Fallback transparente
-
-O sistema diferencia respostas baseadas nos materiais locais de respostas feitas com conhecimento geral da LLM.
-
-### Logs auditáveis
-
-Cada ferramenta registra entrada e saída. A interface exibe uma versão amigável e mantém o JSON bruto disponível.
-
-### Diagnóstico de LLM
-
-Foram criados endpoints de debug para isolar problemas de token, URL, timeout e conectividade.
-
----
-
-## 10. Limitações conhecidas
-
-- O desempenho do RAG híbrido depende da memória disponível no servidor.
-- Em deploys gratuitos, pode haver cold start e lentidão inicial.
-- A qualidade das respostas depende da qualidade dos documentos cadastrados.
-- Quando um tema não está na base local, o sistema usa fallback acadêmico com aviso.
-- A API institucional pode ter limite de uso e deve ser preservada.
-
----
-
-## 11. Segurança
-
-Não versionar:
-
-- `.env`
-- tokens de Hugging Face;
-- `GEMMA_API_KEY`;
-- arquivos privados com credenciais.
-
-O `.gitignore` deve bloquear `.env`, cache, ambientes virtuais e arquivos temporários.
-
----
-
-## 12. Status do projeto
-
-| Item | Status |
+| Tecnologia | Uso |
 |---|---|
-| Frontend React | Implementado |
-| Backend FastAPI | Implementado |
-| RAG | Implementado |
-| Tool calling | Implementado |
-| Gemma 12B | Implementado |
-| Upload de documentos | Implementado |
-| Fallback acadêmico | Implementado |
-| Logs/evidências | Implementado |
-| Deploy Docker | Implementado |
-| Testes | Implementado |
+| Python | Backend e lógica do agente |
+| FastAPI | API web |
+| React | Interface web |
+| Vite | Build do frontend |
+| Docker | Empacotamento para deploy |
+| Hugging Face Spaces | Hospedagem online |
+| Render | Teste de deploy alternativo |
+| OpenAI SDK | Cliente compatível com a API Gemma |
+| Gemma 12B | LLM obrigatória |
+| BM25 | Recuperação lexical |
+| FAISS | Busca vetorial |
+| Sentence Transformers | Embeddings |
+| Pytest | Testes automatizados |
+| Git/GitHub | Versionamento |
+
+---
+
+## 14. Estrutura de pastas
+
+```text
+jarvis-academico/
+├── data/
+├── docs/
+├── frontend/
+│   └── src/
+├── logs/
+├── scripts/
+├── src/
+├── storage/
+├── tests/
+├── web_api/
+├── Dockerfile
+├── README.md
+├── requirements.txt
+├── requirements_cpu.txt
+└── render.yaml
+```
+
+---
+
+## 15. Limitações conhecidas
+
+- A qualidade das respostas depende dos documentos cadastrados.
+- Quando o tema não existe no dataset, o sistema usa fallback acadêmico.
+- Deploys gratuitos podem ter limitações de memória e tempo de resposta.
+- A chave da Gemma deve ser configurada corretamente para uso real.
+- O sistema não coleta dados automaticamente da internet.
+- O conjunto inicial de documentos é pequeno e serve como base demonstrativa.
+
+---
+
+## 16. Evidências dos critérios de avaliação
+
+### Funcionalidade — 20%
+
+O sistema possui interface web funcional, chat, upload de documentos, consulta a materiais, tarefas, agenda e geração de plano de estudos.
+
+### RAG — 20%
+
+O sistema realiza chunking, indexação, recuperação de documentos, exibição de fontes e geração de resposta com contexto.
+
+### Tool calling — 15%
+
+A LLM aciona ferramentas internas e as chamadas são registradas na aba de evidências técnicas.
+
+### Avaliação + erros — 20%
+
+O projeto possui fallback acadêmico, tratamento de erro de token, timeout, ausência de contexto e endpoint de diagnóstico da Gemma.
+
+### Aprendizado — 15%
+
+O assistente explica conceitos, gera exercícios e monta planos de estudo.
+
+### Engenharia — 10%
+
+O projeto usa separação entre frontend e backend, Docker, testes, variáveis de ambiente, documentação e deploy online.
+
+---
+
+## 17. Autores
+
+Projeto desenvolvido para a disciplina de Inteligência Artificial — FACOM/UFMS.
+
+Repositório principal:
+
+```text
+https://github.com/TeoZ08/jarvis-academico
+```
+
+Deploy:
+
+```text
+https://huggingface.co/spaces/TeoZ08/jarvis-academico
+```
