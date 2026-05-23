@@ -644,6 +644,20 @@ jarvis-academico/
 
 ---
 
+## IAs utilizadas no desenvolvimento
+
+Durante o desenvolvimento do projeto, utilizamos ferramentas de Inteligência Artificial como apoio para organização, revisão, depuração e documentação do trabalho.
+
+As IAs utilizadas foram:
+
+- **ChatGPT**: Geração de código, apoio na estruturação do projeto, revisão de código, documentação, organização do README, análise de erros.
+- **Gemini**: apoio complementar na revisão de ideias, validação de explicações e comparação de alternativas técnicas.
+- **Gemma 12B via API LIA/UFMS**: modelo de linguagem integrado ao JARVIS Acadêmico para geração de respostas no sistema final.
+
+Observação: as IAs foram utilizadas como ferramentas de apoio. A implementação, validação, organização do repositório e decisões finais do projeto foram realizadas pelo grupo.
+
+---
+
 ## 👥 Autores
 
 Projeto desenvolvido para a disciplina de **Inteligência Artificial — FACOM/UFMS** por Matteo Lima e Pedro Bertoncelo.
