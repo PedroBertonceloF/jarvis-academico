@@ -11,13 +11,13 @@ pinned: false
 
 # JARVIS Acadêmico — Assistente com RAG, Gemma 12B e Tool Calling
 
-Projeto prático da disciplina de **Inteligência Artificial — FACOM/UFMS**.
+Projeto prático da disciplina de **Inteligência Artificial — FACOM/UFMS**, desenvolvido por Matteo Lima e Pedro Bertoncelo.
 
 O **JARVIS Acadêmico** é um assistente pessoal acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos da disciplina. O sistema combina **RAG**, **integração com LLM Gemma 12B**, **tool calling**, upload de documentos, planejamento de estudos, geração de exercícios e painel técnico de evidências.
 
 ## Link do projeto online
 
-O projeto está disponível no Hugging Face Spaces:
+O projeto está rodando e disponível no Hugging Face Spaces:
 
 https://huggingface.co/spaces/TeoZ08/jarvis-academico
 
@@ -638,7 +638,7 @@ O projeto usa separação entre frontend e backend, Docker, testes, variáveis d
 
 ## 17. Autores
 
-Projeto desenvolvido para a disciplina de Inteligência Artificial — FACOM/UFMS.
+Projeto desenvolvido por Matteo Lima e Pedro Bertoncelo para a disciplina de Inteligência Artificial — FACOM/UFMS.
 
 Repositório principal:
 
