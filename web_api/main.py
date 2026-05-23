@@ -17,7 +17,18 @@ from src.agent import JarvisAgent
 from src.config import settings
 from src.llm_client import GemmaClient
 from src.rag import RagEngine, SUPPORTED_EXTENSIONS
-from src.storage import AgendaStore, EventoAgenda, Tarefa, TarefaStore, inicializar_dados_demo
+from src.learning import LearningService
+from src.storage import (
+    AgendaStore,
+    Dificuldade,
+    DificuldadeStore,
+    EventoAgenda,
+    Revisao,
+    RevisaoStore,
+    Tarefa,
+    TarefaStore,
+    inicializar_dados_demo,
+)
 from src.tools import ToolRegistry
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -157,6 +168,22 @@ class AgendaRequest(BaseModel):
     hora_fim: str = ""
     tipo: str = "aula"
     observacao: str = ""
+
+
+class DificuldadeRequest(BaseModel):
+    disciplina: str = "Inteligência Artificial"
+    topico: str = Field(..., min_length=1)
+    observacao: str = ""
+
+
+class RevisaoRequest(BaseModel):
+    disciplina: str = "Inteligência Artificial"
+    tema: str = ""
+
+
+class AvaliacaoRevisaoRequest(BaseModel):
+    resposta_aluno: str = Field(..., min_length=1)
+    review_id: str = ""
 
 
 @app.get("/api/health")
@@ -310,6 +337,85 @@ def adicionar_evento(payload: AgendaRequest) -> dict[str, Any]:
             observacao=payload.observacao,
         )
     )
+
+
+@app.get("/api/dificuldades")
+def listar_dificuldades(
+    disciplina: str | None = None,
+    limite: int = Query(20, ge=1, le=200),
+) -> list[dict[str, Any]]:
+    return DificuldadeStore().listar(disciplina=disciplina, limite=limite)
+
+
+@app.post("/api/dificuldades")
+def registrar_dificuldade(payload: DificuldadeRequest) -> dict[str, Any]:
+    return DificuldadeStore().adicionar(
+        Dificuldade(
+            disciplina=payload.disciplina,
+            topico=payload.topico,
+            origem="api",
+            observacao=payload.observacao,
+        )
+    )
+
+
+@app.get("/api/revisoes")
+def listar_revisoes(incluir_avaliadas: bool = Query(True)) -> list[dict[str, Any]]:
+    return RevisaoStore().listar(incluir_avaliadas=incluir_avaliadas)
+
+
+@app.post("/api/revisoes/iniciar")
+def iniciar_revisao(payload: RevisaoRequest) -> dict[str, Any]:
+    agent = _get_agent()
+    gerada = LearningService(agent.tools.rag).gerar_pergunta_revisao(
+        disciplina=payload.disciplina,
+        tema=payload.tema,
+    )
+    if not gerada.get("ok"):
+        return gerada
+    revisao = RevisaoStore().criar(
+        Revisao(
+            disciplina=payload.disciplina,
+            tema=gerada.get("tema", payload.tema or payload.disciplina),
+            pergunta=gerada["pergunta"],
+            contexto=gerada["contexto"],
+            fontes=gerada.get("documentos_recuperados", []),
+        )
+    )
+    return {
+        "ok": True,
+        "review_id": revisao["id"],
+        "disciplina": revisao["disciplina"],
+        "tema": revisao["tema"],
+        "pergunta": revisao["pergunta"],
+        "fontes": revisao["fontes"],
+    }
+
+
+@app.post("/api/revisoes/avaliar")
+def avaliar_revisao(payload: AvaliacaoRevisaoRequest) -> dict[str, Any]:
+    try:
+        revisao = RevisaoStore().obter(payload.review_id or None)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    agent = _get_agent()
+    avaliacao = LearningService(agent.tools.rag).avaliar_resposta(
+        pergunta=revisao["pergunta"],
+        contexto=revisao["contexto"],
+        resposta_aluno=payload.resposta_aluno,
+    )
+    atualizada = RevisaoStore().registrar_avaliacao(revisao["id"], avaliacao)
+    if avaliacao.get("status") in {"PARTIAL", "INCORRECT"}:
+        DificuldadeStore().adicionar(
+            Dificuldade(
+                disciplina=revisao.get("disciplina", "Inteligência Artificial"),
+                topico=str(avaliacao.get("topic", "Revisão geral")),
+                origem="avaliacao_revisao_api",
+                observacao=str(avaliacao.get("feedback", "")),
+            )
+        )
+    return {"ok": True, "review_id": revisao["id"], "avaliacao": avaliacao, "revisao": atualizada}
 
 
 @app.get("/api/logs")

@@ -55,10 +55,14 @@ Regras obrigatórias:
 - Responda SOMENTE com JSON válido.
 - Se nenhuma ferramenta for necessária, responda: []
 - Formato: [{{"tool": "nome_da_ferramenta", "args": {{...}}}}]
-- Para agenda, use consultar_agenda.
+- Para consultar agenda, use consultar_agenda.
+- Para adicionar prova, aula, entrega ou evento, use adicionar_evento.
 - Para tarefas, use listar_tarefas, adicionar_tarefa ou concluir_tarefa.
-- Para plano/prioridade de estudos, use planejar_estudos.
+- Para plano/prioridade de estudos, use planejar_estudos; ele já considera dificuldades registradas.
 - Para exercícios ou prática, use gerar_exercicios.
+- Para iniciar revisão ativa/active recall, use iniciar_revisao.
+- Para avaliar a resposta do aluno a uma revisão, use avaliar_resposta_revisao.
+- Para registrar ou consultar dificuldades, use registrar_dificuldade ou listar_dificuldades.
 - Para dúvidas acadêmicas, explicações, resumos e conceitos de estudo, chame buscar_material_rag primeiro.
 - Mesmo que o tema pareça amplo ou não esteja claramente nos materiais, use buscar_material_rag para verificar a base local.
 - Se for apenas conversa casual, saudação ou pedido não acadêmico, responda [].

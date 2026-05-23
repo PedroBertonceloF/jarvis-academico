@@ -171,6 +171,31 @@ class GemmaClient:
         m = mensagem.lower()
         hoje = date.today().isoformat()
 
+        if any(p in m for p in ["avaliar minha resposta", "avalie minha resposta", "corrija minha resposta"]):
+            return [{"tool": "avaliar_resposta_revisao", "args": {"resposta_aluno": mensagem}}]
+
+        if any(p in m for p in ["revisão ativa", "revisao ativa", "active recall", "sessão de revisão", "sessao de revisao"]):
+            tema = mensagem
+            for termo in ["sobre", "de"]:
+                if termo in m:
+                    tema = mensagem.split(termo, 1)[-1].strip()
+                    break
+            return [{"tool": "iniciar_revisao", "args": {"disciplina": "Inteligência Artificial", "tema": tema}}]
+
+        if any(p in m for p in ["registrar dificuldade", "tenho dificuldade", "minha dificuldade"]):
+            topico = mensagem
+            for termo in ["em", "sobre"]:
+                if termo in m:
+                    topico = mensagem.split(termo, 1)[-1].strip()
+                    break
+            return [{"tool": "registrar_dificuldade", "args": {"disciplina": "Inteligência Artificial", "topico": topico}}]
+
+        if any(p in m for p in ["listar dificuldades", "minhas dificuldades", "dificuldades registradas"]):
+            return [{"tool": "listar_dificuldades", "args": {"limite": 10}}]
+
+        if any(p in m for p in ["adicionar evento", "adicionar prova", "adicionar aula", "nova prova", "nova aula"]):
+            return [{"tool": "adicionar_evento", "args": {"data": hoje, "titulo": mensagem, "tipo": "evento"}}]
+
         if any(p in m for p in ["concluir", "marcar", "finalizar"]):
             alvo = re.sub(r".*?(concluir|marcar|finalizar)( tarefa)?", "", mensagem, flags=re.IGNORECASE).strip()
             return [{"tool": "concluir_tarefa", "args": {"tarefa_id_ou_titulo": alvo or mensagem}}]
@@ -245,6 +270,8 @@ class GemmaClient:
                 partes.append("\nAgenda encontrada: " + self._resumir_objeto(saida))
             elif tool == "listar_tarefas":
                 partes.append("\nTarefas encontradas: " + self._resumir_objeto(saida))
+            elif tool == "adicionar_evento":
+                partes.append("\nEvento adicionado: " + self._resumir_objeto(saida))
             elif tool == "adicionar_tarefa":
                 partes.append("\nTarefa adicionada: " + self._resumir_objeto(saida))
             elif tool == "concluir_tarefa":
@@ -258,6 +285,14 @@ class GemmaClient:
                     "2. Cite uma vantagem e uma limitação.\n"
                     "3. Dê um exemplo aplicado ao trabalho prático."
                 )
+            elif tool == "iniciar_revisao":
+                partes.append("\nRevisão ativa iniciada: " + self._resumir_objeto(saida))
+            elif tool == "avaliar_resposta_revisao":
+                partes.append("\nResposta avaliada: " + self._resumir_objeto(saida))
+            elif tool == "registrar_dificuldade":
+                partes.append("\nDificuldade registrada: " + self._resumir_objeto(saida))
+            elif tool == "listar_dificuldades":
+                partes.append("\nDificuldades registradas: " + self._resumir_objeto(saida))
             else:
                 partes.append(f"\n{tool}: {self._resumir_objeto(saida)}")
 

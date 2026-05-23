@@ -10,6 +10,8 @@ from .config import settings
 
 AGENDA_PATH = settings.storage_dir / "agenda.json"
 TAREFAS_PATH = settings.storage_dir / "tarefas.json"
+DIFICULDADES_PATH = settings.storage_dir / "dificuldades.json"
+REVISOES_PATH = settings.storage_dir / "revisoes.json"
 
 
 def _read_json(path: Path, default):
@@ -105,6 +107,107 @@ class TarefaStore:
                 self.salvar_tarefas(tarefas)
                 return tarefa
         raise ValueError(f"Tarefa não encontrada: {tarefa_id_ou_titulo}")
+
+
+@dataclass
+class Dificuldade:
+    disciplina: str
+    topico: str
+    origem: str = "manual"
+    observacao: str = ""
+    criado_em: str = ""
+    id: str = ""
+
+    def __post_init__(self):
+        if not self.id:
+            self.id = str(uuid.uuid4())[:8]
+        if not self.criado_em:
+            self.criado_em = datetime.now().isoformat(timespec="seconds")
+
+
+@dataclass
+class Revisao:
+    disciplina: str
+    tema: str
+    pergunta: str
+    contexto: str
+    fontes: list[dict]
+    status: str = "pendente"
+    avaliacao: dict | None = None
+    criado_em: str = ""
+    id: str = ""
+
+    def __post_init__(self):
+        if not self.id:
+            self.id = str(uuid.uuid4())[:8]
+        if not self.criado_em:
+            self.criado_em = datetime.now().isoformat(timespec="seconds")
+        if self.avaliacao is None:
+            self.avaliacao = {}
+
+
+class DificuldadeStore:
+    def listar(self, disciplina: str | None = None, limite: int | None = None) -> list[dict]:
+        itens = _read_json(DIFICULDADES_PATH, [])
+        if disciplina:
+            alvo = disciplina.strip().lower()
+            itens = [d for d in itens if d.get("disciplina", "").strip().lower() == alvo]
+        itens.sort(key=lambda d: d.get("criado_em", ""), reverse=True)
+        if limite:
+            itens = itens[: int(limite)]
+        return itens
+
+    def salvar(self, itens: list[dict]) -> None:
+        _write_json(DIFICULDADES_PATH, itens)
+
+    def adicionar(self, dificuldade: Dificuldade) -> dict:
+        itens = self.listar()
+        item = asdict(dificuldade)
+        itens.append(item)
+        self.salvar(itens)
+        return item
+
+
+class RevisaoStore:
+    def listar(self, incluir_avaliadas: bool = True) -> list[dict]:
+        itens = _read_json(REVISOES_PATH, [])
+        if not incluir_avaliadas:
+            itens = [r for r in itens if r.get("status") == "pendente"]
+        itens.sort(key=lambda r: r.get("criado_em", ""), reverse=True)
+        return itens
+
+    def salvar(self, itens: list[dict]) -> None:
+        _write_json(REVISOES_PATH, itens)
+
+    def criar(self, revisao: Revisao) -> dict:
+        itens = self.listar()
+        item = asdict(revisao)
+        itens.append(item)
+        self.salvar(itens)
+        return item
+
+    def obter(self, revisao_id: str | None = None) -> dict:
+        itens = self.listar()
+        if revisao_id:
+            alvo = revisao_id.strip().lower()
+            for item in itens:
+                if item.get("id", "").lower() == alvo:
+                    return item
+            raise ValueError(f"Revisão não encontrada: {revisao_id}")
+        pendentes = [r for r in itens if r.get("status") == "pendente"]
+        if not pendentes:
+            raise ValueError("Nenhuma revisão pendente encontrada.")
+        return pendentes[0]
+
+    def registrar_avaliacao(self, revisao_id: str, avaliacao: dict) -> dict:
+        itens = self.listar()
+        for item in itens:
+            if item.get("id") == revisao_id:
+                item["status"] = "avaliada"
+                item["avaliacao"] = avaliacao
+                self.salvar(itens)
+                return item
+        raise ValueError(f"Revisão não encontrada: {revisao_id}")
 
 
 def inicializar_dados_demo() -> None:

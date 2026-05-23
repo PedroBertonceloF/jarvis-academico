@@ -32,6 +32,8 @@ O objetivo do JARVIS Acadêmico é atuar como um copiloto de estudos para alunos
 - consultar materiais cadastrados por meio de RAG;
 - gerar planos de estudo;
 - sugerir exercícios;
+- gerar sessões de revisão ativa com perguntas baseadas no RAG;
+- avaliar respostas do aluno e registrar dificuldades;
 - registrar evidências técnicas de tool calling;
 - demonstrar integração real com uma LLM obrigatória;
 - apoiar o aprendizado de forma transparente e rastreável.
@@ -95,9 +97,12 @@ O sistema possui ferramentas internas que podem ser chamadas pelo agente, como:
 
 - busca em materiais via RAG;
 - planejamento de estudos;
-- listagem de tarefas;
-- consulta de agenda;
+- listagem, criação e conclusão de tarefas;
+- consulta e criação de eventos de agenda;
 - geração de exercícios;
+- sessões de revisão ativa;
+- avaliação de respostas do aluno;
+- registro de dificuldades para personalização de estudos;
 - diagnóstico da Gemma.
 
 Cada chamada de ferramenta é registrada no painel de evidências técnicas.
@@ -116,6 +121,19 @@ Vou responder com meu conhecimento geral da base de dados do modelo.
 ```
 
 Esse comportamento melhora a transparência e reduz o risco de alucinação.
+
+### Revisão ativa e dificuldades
+
+O projeto incorporou uma camada de aprendizado ativo inspirada na versão complementar desenvolvida pelo grupo. Essa camada permite:
+
+- gerar uma pergunta de revisão com base nos materiais recuperados pelo RAG;
+- salvar um `review_id` para a sessão de revisão;
+- avaliar a resposta do aluno usando Gemma;
+- classificar a resposta como `CORRECT`, `PARTIAL` ou `INCORRECT`;
+- registrar automaticamente tópicos de dificuldade quando a resposta for parcial ou incorreta;
+- usar dificuldades recentes como contexto adicional no plano de estudos.
+
+Essa melhoria reforça os critérios de **Aprendizado**, **Tool calling**, **Funcionalidade** e **Avaliação + erros**.
 
 ---
 
@@ -265,7 +283,11 @@ Exemplos de ferramentas:
 | `planejar_estudos` | Gera plano de estudos |
 | `listar_tarefas` | Consulta tarefas acadêmicas |
 | `consultar_agenda` | Consulta compromissos simulados |
+| `adicionar_evento` | Cria eventos acadêmicos na agenda |
 | `gerar_exercicios` | Cria exercícios com base nos conteúdos |
+| `iniciar_revisao` | Gera uma pergunta de active recall baseada no RAG |
+| `avaliar_resposta_revisao` | Avalia a resposta do aluno e registra dificuldade |
+| `registrar_dificuldade` | Salva dificuldades para personalizar planos |
 
 A aba **Evidências Técnicas** mostra:
 
@@ -454,6 +476,14 @@ Monte um plano de estudos para a prova de IA.
 
 ```text
 Gere 3 exercícios sobre embeddings.
+```
+
+```text
+Inicie uma revisão ativa sobre RAG.
+```
+
+```text
+Registre que tenho dificuldade em BM25.
 ```
 
 ---
