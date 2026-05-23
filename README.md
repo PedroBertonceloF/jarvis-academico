@@ -1,3 +1,13 @@
+---
+title: JARVIS Acadêmico
+emoji: 🧠
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # JARVIS Acadêmico — Assistente com RAG, Gemma 12B e Tool Calling
 
 Projeto prático da disciplina de **Inteligência Artificial — FACOM/UFMS**.
