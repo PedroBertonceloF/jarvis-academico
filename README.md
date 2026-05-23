@@ -20,7 +20,7 @@ pinned: false
 
 > Assistente acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos de Inteligência Artificial, combinando **RAG**, **Gemma 12B**, **tool calling**, upload de documentos, revisão ativa e painel de evidências técnicas.
 
-## 🔗 Projeto online
+## Projeto online
 
 - **Link oficial do projeto rodando para teste do professor:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
 - **Link direto provável do app:** https://teoz08-jarvis-academico.hf.space
@@ -28,7 +28,7 @@ pinned: false
 
 ---
 
-## 📌 Sumário
+## Sumário
 
 - [Objetivo do projeto](#-objetivo-do-projeto)
 - [Critérios de avaliação atendidos](#-critérios-de-avaliação-atendidos)
@@ -49,7 +49,7 @@ pinned: false
 
 ---
 
-## 🎯 Objetivo do projeto
+## Objetivo do projeto
 
 O **JARVIS Acadêmico** foi criado como um copiloto de estudos para alunos de Computação. O sistema ajuda o estudante a consultar materiais, tirar dúvidas, organizar a rotina acadêmica e praticar conceitos por meio de revisão ativa.
 
@@ -67,7 +67,7 @@ O projeto tem como objetivos principais:
 
 ---
 
-## ✅ Critérios de avaliação atendidos
+## Critérios de avaliação atendidos
 
 | Critério | Peso | Evidência no projeto |
 |---|---:|---|
@@ -80,7 +80,7 @@ O projeto tem como objetivos principais:
 
 ---
 
-## 🚀 Funcionalidades principais
+## Funcionalidades principais
 
 ### Chat acadêmico
 
@@ -151,7 +151,7 @@ Esse comportamento melhora a transparência e reduz o risco de alucinação.
 
 ---
 
-## 🗂️ Origem dos dados do dataset
+## Origem dos dados do dataset
 
 A versão inicial do dataset do JARVIS Acadêmico foi criada por nós em formato Markdown.
 
@@ -194,7 +194,7 @@ Além dessa base inicial, o sistema permite importar novos documentos, como arqu
 
 ---
 
-## 🧱 Arquitetura
+## Arquitetura
 
 ```mermaid
 graph TD;
@@ -227,7 +227,7 @@ graph TD;
 
 ---
 
-## 🔎 RAG
+## RAG
 
 O projeto implementa RAG para recuperar trechos relevantes antes de gerar respostas.
 
@@ -279,7 +279,7 @@ Escolhemos essa estratégia para manter os trechos pequenos o suficiente para um
 
 ---
 
-## 🤖 Integração com Gemma 12B
+## Integração com Gemma 12B
 
 A LLM obrigatória utilizada é:
 
@@ -309,7 +309,7 @@ A chave nunca deve ser versionada no Git.
 
 ---
 
-## 🛠️ Tool calling
+## Tool calling
 
 O sistema implementa tool calling para permitir que a LLM acione ferramentas internas.
 
@@ -339,7 +339,7 @@ Essa tela foi criada para facilitar a correção do requisito de tool calling.
 
 ---
 
-## 🧪 Avaliação, erros e governança
+## Avaliação, erros e governança
 
 O projeto possui tratamento controlado para diferentes situações.
 
@@ -375,7 +375,7 @@ Exemplo de retorno esperado:
 
 ---
 
-## 💻 Como executar localmente
+## Como executar localmente
 
 ### Pré-requisitos
 
@@ -463,7 +463,7 @@ http://localhost:5173
 
 ---
 
-## ☕ Como testar
+## Como testar
 
 ### Teste de status
 
@@ -509,7 +509,7 @@ Gere 3 exercícios sobre embeddings.
 
 ---
 
-## 🚢 Deploy
+## Deploy
 
 O projeto foi preparado para deploy com Docker.
 
@@ -554,7 +554,7 @@ GEMMA_API_KEY=sua_chave_aqui
 
 ---
 
-## 🔐 Segurança
+## Segurança
 
 Arquivos e informações que não devem ser versionados:
 
@@ -573,7 +573,7 @@ A chave da Gemma deve ser usada apenas via:
 
 ---
 
-## 🧰 Tecnologias utilizadas
+## Tecnologias utilizadas
 
 | Tecnologia | Uso |
 |---|---|
@@ -593,7 +593,7 @@ A chave da Gemma deve ser usada apenas via:
 
 ---
 
-## 📁 Estrutura de pastas
+## Estrutura de pastas
 
 ```text
 jarvis-academico/
@@ -615,7 +615,7 @@ jarvis-academico/
 
 ---
 
-## 📍 Status do projeto
+## Status do projeto
 
 - [x] Interface web em React.
 - [x] Backend em FastAPI.
@@ -633,7 +633,7 @@ jarvis-academico/
 
 ---
 
-## ⚠️ Limitações conhecidas
+## Limitações conhecidas
 
 - A qualidade das respostas depende dos documentos cadastrados.
 - Quando o tema não existe no dataset, o sistema usa fallback acadêmico.
@@ -658,7 +658,7 @@ Observação: as IAs foram utilizadas como ferramentas de apoio. A implementaç�
 
 ---
 
-## 👥 Autores
+## Autores
 
 Projeto desenvolvido para a disciplina de **Inteligência Artificial — FACOM/UFMS** por Matteo Lima e Pedro Bertoncelo.
 
