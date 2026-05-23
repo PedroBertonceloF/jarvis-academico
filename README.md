@@ -22,9 +22,8 @@ pinned: false
 
 ## 🔗 Projeto online
 
-- **Rodando no Hugging Face Spaces:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
-
-
+- **Link oficial do projeto rodando para teste do professor:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
+- **Link direto provável do app:** https://teoz08-jarvis-academico.hf.space
 - **Repositório GitHub:** https://github.com/TeoZ08/jarvis-academico
 
 ---
@@ -584,7 +583,6 @@ A chave da Gemma deve ser usada apenas via:
 | Vite | Build do frontend. |
 | Docker | Empacotamento para deploy. |
 | Hugging Face Spaces | Hospedagem online. |
-| Render | Teste de deploy alternativo. |
 | OpenAI SDK | Cliente compatível com a API Gemma. |
 | Gemma 12B | LLM obrigatória. |
 | BM25 | Recuperação lexical. |
@@ -612,8 +610,7 @@ jarvis-academico/
 ├── Dockerfile
 ├── README.md
 ├── requirements.txt
-├── requirements_cpu.txt
-└── render.yaml
+└── requirements_cpu.txt
 ```
 
 ---

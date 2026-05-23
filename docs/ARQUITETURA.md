@@ -10,7 +10,7 @@ Frontend React
   ▼
 Backend FastAPI
   ├── Agente acadêmico
-  ├── Cliente LLM Gemma/mock
+  ├── Cliente LLM Gemma
   ├── Tool calling
   ├── RAG
   ├── Storage
@@ -107,7 +107,7 @@ Modos:
 | Modo | Função |
 |---|---|
 | `gemma` | Usa a API Gemma 12B fornecida. |
-| `mock` | Simula resposta para testes sem consumo de API. |
+| `mock` | Modo auxiliar local para desenvolvimento sem consumo de API. Não é o modo oficial da entrega. |
 
 Variáveis principais:
 
@@ -213,12 +213,6 @@ Porta padrão:
 ```text
 7860
 ```
-
-### Render
-
-Também suportado, mas pode exigir `RAG_MODE=lexical` em planos gratuitos por limite de memória.
-
----
 
 ## Segurança
 

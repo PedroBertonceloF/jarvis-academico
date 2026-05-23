@@ -2,63 +2,70 @@
 
 ## Objetivo
 
-Desenvolver um assistente acadêmico capaz de apoiar estudantes na organização dos estudos usando RAG, tool calling e a LLM Gemma 12B via API LIA/UFMS.
+Desenvolver um assistente acadêmico capaz de apoiar estudantes na organização dos estudos usando **RAG**, **tool calling** e a **LLM Gemma 12B via API LIA/UFMS**.
+
+---
 
 ## Público-alvo
 
-Estudantes que precisam consultar materiais, organizar agenda, controlar tarefas, revisar conteúdos e planejar estudos.
+Estudantes que precisam consultar materiais, organizar agenda, controlar tarefas, planejar revisões e praticar conceitos acadêmicos.
+
+---
 
 ## Funcionalidades obrigatórias
 
 - Consulta a materiais de estudo usando RAG.
 - Consulta de agenda acadêmica.
 - Lista de tarefas com adição, listagem e conclusão.
-- Planejamento de estudos combinando agenda, tarefas e materiais.
+- Planejamento de estudos combinando agenda, tarefas, materiais e dificuldades.
 - Tool calling decidido pela LLM.
 - Logs das ferramentas chamadas, com entrada e saída.
-- Avaliação com 10 perguntas.
-- Análise de erros e decisões de correção.
+- Funcionalidades de aprendizado, incluindo exercícios, revisão ativa e registro de dificuldades.
+- Avaliação do sistema com 10 perguntas.
+- Análise de erros e limitações.
 
-## Funcionalidades adicionais implementadas
+---
 
-- Interface web em React + Vite.
-- Backend FastAPI.
-- Deploy com Docker no Hugging Face Spaces.
-- Upload de documentos pela interface.
-- Reindexação da base após upload.
-- Fallback acadêmico transparente para temas fora dos materiais.
-- Revisão ativa sobre temas acadêmicos.
-- Registro de dificuldades do aluno.
-- Plano de estudos considerando agenda, tarefas, materiais e dificuldades.
-- Endpoints de diagnóstico para configuração e Gemma.
-- Painel de evidências técnicas para demonstrar RAG, tool calling e logs.
+## Funcionalidades implementadas
 
-## Fora de escopo
+### Chat acadêmico
 
-- Autenticação de usuários.
-- Banco de dados remoto.
-- Multiusuário com controle de permissões.
-- Coleta automática de dados da internet.
-- Uso ilimitado da API Gemma.
-- Garantia de produção comercial.
+O usuário conversa com o JARVIS sobre conteúdos da disciplina de Inteligência Artificial e temas gerais de Computação.
 
-## Critérios de sucesso
+### RAG
 
-- O sistema executa de ponta a ponta no modo Gemma.
-- O modo mock continua disponível apenas como apoio de desenvolvimento.
-- As ferramentas são chamadas pela LLM e registradas em log.
-- O RAG recupera documentos relevantes e responde com base nos trechos.
-- A interface exibe fontes, ferramentas chamadas e evidências técnicas.
-- A entrega contém documentação, testes básicos, avaliação e análise de erros.
-- O deploy oficial no Hugging Face Spaces está acessível para teste.
+O sistema recupera trechos relevantes dos documentos cadastrados, mostra fontes e usa esses trechos para orientar a resposta da LLM.
 
-## Upload de materiais
+### Upload de documentos
 
-O sistema permite que o usuário importe materiais acadêmicos diretamente pela interface web. Os arquivos são persistidos em `data/uploads/` e passam a compor a base de conhecimento após a reindexação.
+O sistema permite importar materiais acadêmicos pela interface web React. Os arquivos são enviados para o backend FastAPI, persistidos em `data/uploads/` e incorporados à base de conhecimento após a reindexação.
 
-Esse recurso permite ampliar a base do RAG sem alterar manualmente os arquivos internos do projeto.
+Formatos previstos:
 
-## Fallback acadêmico transparente
+- `.pdf`;
+- `.txt`;
+- `.md`;
+- `.py`.
+
+### Agenda e tarefas
+
+O sistema permite consultar e registrar compromissos acadêmicos, tarefas e prazos.
+
+### Planejamento de estudos
+
+O plano considera materiais, agenda, tarefas e dificuldades registradas.
+
+### Revisão ativa
+
+O sistema gera uma pergunta de revisão, recebe a resposta do aluno e avalia a resposta com feedback objetivo.
+
+### Registro de dificuldades
+
+O usuário pode registrar dificuldades manualmente, e o sistema também pode registrar dificuldades a partir de respostas parciais ou incorretas em revisão ativa.
+
+---
+
+## Requisito adicional: fallback acadêmico transparente
 
 Quando a pergunta do usuário for acadêmica, mas não houver evidência suficiente nos materiais cadastrados, o JARVIS deve:
 
@@ -68,13 +75,23 @@ Quando a pergunta do usuário for acadêmica, mas não houver evidência suficie
 
 Esse requisito torna o sistema mais útil como tutor sem comprometer a transparência sobre a origem da informação.
 
-## Aprendizado e revisão ativa
+---
 
-O sistema também apoia o aprendizado por meio de:
+## Fora de escopo
 
-- geração de perguntas de revisão;
-- avaliação de respostas do aluno;
-- registro de dificuldades;
-- uso das dificuldades no planejamento de estudos.
+- Autenticação de usuários.
+- Banco de dados remoto.
+- Multiusuário com controle de permissões.
+- Coleta automática de dados da internet.
+- Uso ilimitado da API Gemma.
 
-Essa camada reforça o papel do JARVIS como assistente acadêmico, não apenas como chat de perguntas e respostas.
+---
+
+## Critérios de sucesso
+
+- O sistema executa de ponta a ponta no modo Gemma.
+- O deploy oficial roda no Hugging Face Spaces.
+- As ferramentas são chamadas pela LLM e registradas em log.
+- O RAG recupera documentos relevantes e apresenta fontes.
+- O fallback acadêmico é transparente quando não há evidência suficiente.
+- A entrega contém documentação, testes básicos, avaliação com 10 perguntas e análise de erros.

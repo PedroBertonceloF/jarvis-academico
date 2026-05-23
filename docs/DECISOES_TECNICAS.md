@@ -1,8 +1,8 @@
 # Decisões técnicas
 
-## 1. React no lugar de Streamlit
+## 1. React como interface final
 
-A versão inicial em Streamlit era suficiente para prototipagem, mas limitada visualmente. A interface foi migrada para React para melhorar:
+A interface final foi construída em React para melhorar:
 
 - apresentação;
 - responsividade;
@@ -35,7 +35,6 @@ O mesmo projeto pode ser executado em:
 
 - máquina local;
 - Hugging Face Spaces;
-- Render;
 - VPS futura.
 
 ---

@@ -15,6 +15,7 @@ logs/*.jsonl
 storage/*.json
 storage/index_cache/
 avaliacao_sistema.csv
+avaliacao_saida.txt
 evidencias/
 
 # Arquivos grandes locais
