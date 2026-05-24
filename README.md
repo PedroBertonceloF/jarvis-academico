@@ -20,10 +20,10 @@ pinned: false
 
 > Assistente acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos de Inteligência Artificial, combinando **RAG**, **Gemma 12B**, **tool calling**, upload de documentos, revisão ativa e painel de evidências técnicas.
 
-## Projeto online
+## Links principais
 
-- **Link oficial do projeto rodando para teste do professor:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
-- **Link direto provável do app:** https://teoz08-jarvis-academico.hf.space
+- **Sistema online:** https://teoz08-jarvis-academico.hf.space
+- **Hugging Face Spaces:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
 - **Repositório GitHub:** https://github.com/TeoZ08/jarvis-academico
 
 ---
