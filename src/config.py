@@ -44,7 +44,7 @@ class Settings:
         missing = []
         if not self.gemma_base_url:
             missing.append("GEMMA_BASE_URL")
-        if not self.gemma_api_key or self.gemma_api_key == "COLE_SEU_TOKEN_AQUI":
+        if not self.gemma_api_key or self.gemma_api_key in {"COLE_SEU_TOKEN_AQUI", "COLE_A_CHAVE_AQUI"}:
             missing.append("GEMMA_API_KEY")
         if missing:
             raise RuntimeError(
