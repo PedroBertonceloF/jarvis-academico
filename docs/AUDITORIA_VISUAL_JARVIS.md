@@ -1,120 +1,71 @@
 # Auditoria visual — JARVIS Acadêmico
 
-## Diagnóstico atual
+## Diagnóstico
 
-O JARVIS já possui uma estrutura funcional adequada para a entrega: navegação lateral, chat principal, upload de materiais, tarefas, agenda, fontes, logs e painel de evidências. O problema principal não está na arquitetura da interface, mas na linguagem visual.
+O JARVIS já possuía uma estrutura funcional adequada para a entrega: navegação lateral, chat principal, upload de materiais, tarefas, agenda, fontes, logs e painel de evidências. A revisão visual anterior resolveu parte da hierarquia, mas ainda deixava a identidade apoiada na paleta antiga e em um símbolo desenhado dentro do `App.jsx`.
 
-Pontos que enfraquecem a percepção de produto autoral:
+Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_branding_complete(1).zip`.
 
-- excesso de ciano/roxo neon;
-- múltiplos halos no fundo;
-- sombras grandes em superfícies permanentes;
-- cards aninhados em quase todas as áreas;
-- raios muito altos e repetidos;
-- símbolo `BrandOrb` com aparência genérica de IA;
-- textos em inglês em uma aplicação acadêmica em português;
-- painel contextual com peso visual similar ao chat;
-- evidências técnicas com boa informação, mas ainda com aparência de card-stack.
+## Branding aprovado
 
-## Referências analisadas
+- Conceito: **F01 / C01 — Convergência orbital**.
+- Símbolo: três trajetórias orbitais, múltiplas fontes, síntese, decisão e aprendizagem contínua.
+- Direção cromática: **80% editorial escuro + 20% energia violeta cósmica**.
+- Aplicação: dark-only, sem alternador de tema e sem preferência automática para tema claro.
 
-### AquaIA
+## Ajustes aplicados
 
-Arquivos analisados:
-
-- `/home/matteo/Faculdade/aquaia_ufms/static/src/input.css`;
-- `/home/matteo/Faculdade/aquaia_ufms/templates/base.html`;
-- `/home/matteo/Faculdade/aquaia_ufms/templates/index.html`;
-- assets em `/home/matteo/Faculdade/aquaia_ufms/static/assets/brand/`.
-
-Princípios aproveitáveis:
-
-- hierarquia editorial forte;
-- labels pequenas e objetivas;
-- métricas com números grandes;
-- bordas finas e espaços generosos;
-- teal como identidade controlada;
-- seções separadas por ritmo, não apenas por cards.
-
-Elementos que não devem ser copiados:
-
-- assets de ondas;
-- wordmark;
-- paleta clara integral;
-- navegação e estrutura de telas específicas do AquaIA.
-
-### Portfólio
-
-Arquivos analisados:
-
-- `/home/matteo/ProjetosPessoais/MeuSite/index.html`;
-- `/home/matteo/ProjetosPessoais/MeuSite/style.css`;
-- `/home/matteo/ProjetosPessoais/MeuSite/script.js`;
-- assets em `/home/matteo/ProjetosPessoais/MeuSite/assets/`.
-
-Princípios aproveitáveis:
-
-- estética editorial autoral;
-- grid e textura discretos;
-- `Space Grotesk` para display;
-- `IBM Plex Mono` para detalhes técnicos;
-- transições curtas;
-- hover com deslocamento pequeno;
-- cards usados com parcimônia.
-
-Elementos que não devem ser copiados:
-
-- logo `teo`;
-- textura/frame;
-- command palette;
-- estrutura de portfólio/landing page.
-
-## Direção visual
-
-Conceito: **JARVIS Study OS — editorial academic workspace**.
-
-A interface deve manter o produto operacional, mas trocar a linguagem neon por uma versão escura editorial: fundo quase preto, grade sutil, teal controlado, tipografia com mais personalidade, linhas finas e menos profundidade permanente.
-
-## Mapa de componentes
-
-| Área | Mudança planejada |
+| Área | Implementação |
 |---|---|
-| Marca | Substituir orb CSS por monograma/grafo em SVG inline. |
-| Sidebar | Reduzir peso, usar borda lateral e navegação por linha. |
-| Header | Trocar card por cabeçalho editorial com status compacto. |
-| Sessão do chat | Remover gradiente e transformar em cabeçalho operacional. |
-| Quick prompts | Reduzir para sugestões editoriais menores e responsivas. |
-| Mensagens | Respostas mais planas; user bubble compacta; metadados em mono. |
-| Composer | Manter sticky/elevado, mas com borda e raio menores. |
-| Inspector | Separar seções por linhas, priorizando fontes e ferramentas. |
-| Materiais | Upload e lista com visual mais editorial. |
-| Tarefas | Lista operacional com linhas, não card pesado por item. |
-| Agenda | Timeline mais limpa e legível. |
-| Evidências | Auditoria acadêmica com métricas, timeline e JSON expansível. |
+| Marca | O SVG improvisado foi removido e substituído por assets oficiais em `frontend/public/brand/`. |
+| Sidebar | Símbolo lavanda, item ativo em `--brand-soft` e linha ativa em `--brand`. |
+| Header | Eyebrow e status remoto em lavanda; chunks permanecem neutros. |
+| Chat | Avatar oficial do assistente, mensagem do usuário em violeta profundo e resposta neutra. |
+| Composer | Foco e envio em lavanda, sem gradiente e sem neon. |
+| Inspector | Labels, fontes, métricas e logs com detalhes lavanda e texto técnico em mono. |
+| Materiais | Upload e ações principais em lavanda; sucesso/erro preservados como semântica. |
+| Tarefas | Ação principal lavanda, concluído em verde e erro/alerta nas cores semânticas. |
+| Agenda | Marcadores em lavanda, sem verde decorativo. |
+| Evidências | RAG e métricas em lavanda; fallback em dourado; erros em vermelho; sucesso em verde. |
 
-## Riscos de regressão
+## Paleta vigente
 
-- Quebra de responsividade em mobile por causa do grid principal.
-- Textos longos de fontes/logs causando overflow.
-- Botões de ícone sem label acessível.
-- Build do Vite falhar por import ou JSX inválido.
-- Alteração visual acidental em elementos que indicam fallback/RAG/tool calling.
+- Fundo: `#050505`.
+- Superfícies: `#14121D`, `#1D1928`, `#262335`.
+- Texto principal: `#FBF5F0`.
+- Texto de apoio: `#C7C2CE`.
+- Texto secundário: `#8E8999`.
+- Marca principal: `#8A83DA`.
+- Marca profunda: `#463699`.
+- Energia ambiental: `#3A0CA3`.
+- Sucesso: `#80B89A`.
+- Aviso: `#D4A85F`.
+- Erro: `#D97972`.
 
-## Checklist de implementação
+## Referências antigas removidas
 
-- [x] Ler `frontend/src/App.jsx`.
-- [x] Ler `frontend/src/styles.css`.
-- [x] Localizar repositórios de referência.
-- [x] Confirmar `git status` dos três projetos.
-- [x] Usar AquaIA e portfólio apenas como leitura.
-- [x] Atualizar tokens visuais.
-- [x] Substituir marca genérica.
-- [x] Ajustar textos e labels em português.
-- [x] Reduzir cards, sombras e halos.
-- [x] Melhorar chat, inspector e evidências.
-- [x] Revisar responsividade por CSS e breakpoints.
-- [x] Rodar build e testes automatizados disponíveis.
+- Teal deixou de ser identidade visual.
+- Verde deixou de ser usado como destaque genérico.
+- O símbolo inline antigo foi removido do React.
+- O fundo perdeu o padrão pontilhado que poderia parecer partículas.
+- O halo ambiental foi reduzido a uma única energia violeta controlada.
 
-## Validação visual
+## Riscos de regressão monitorados
 
-O app integrado foi iniciado localmente em `http://127.0.0.1:7860` e o endpoint `/api/status` respondeu corretamente. A verificação visual automatizada por screenshot não pôde ser executada porque este ambiente não possui `agent-browser`, Playwright ou Chromium instalados no PATH.
+- Chat longo precisa manter rolagem interna no fim da conversa.
+- Textos longos de fontes/logs não podem causar overflow horizontal.
+- Avatar e favicon precisam renderizar a partir dos assets oficiais.
+- Mobile não pode comprimir o chat por causa do inspector.
+- Estados de sucesso, alerta e erro continuam sem depender apenas de cor.
+
+## Checklist de validação
+
+- [x] ZIP inspecionado antes da extração.
+- [x] ZIP extraído fora do repositório.
+- [x] Apenas assets de produção copiados para o Git.
+- [x] SVG oficial usado como base da marca.
+- [x] Favicons e PNGs gerados a partir dos SVGs violeta/creme.
+- [x] React usa componente dedicado de marca.
+- [x] Paleta anterior removida do frontend.
+- [x] Design system documentado.
+- [x] Dark-only preservado.

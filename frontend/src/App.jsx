@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import BrandMark from './components/BrandMark.jsx';
 import {
   ArrowRight,
   AlertTriangle,
@@ -169,19 +170,6 @@ function getEvidenceMetrics(logs = []) {
   };
 }
 
-function BrandMark() {
-  return (
-    <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-      <rect x="6" y="6" width="36" height="36" rx="12" />
-      <path d="M27 13v16.4c0 5.2-3.1 7.6-7.4 7.6-2.1 0-4-.5-5.6-1.5" />
-      <path d="M19 21h14" />
-      <circle cx="34" cy="16" r="3" />
-      <circle cx="35" cy="31" r="2.5" />
-      <path d="M33.2 18.6 28 24l5.4 5.3" />
-    </svg>
-  );
-}
-
 const navigationItems = [
   { id: 'chat', label: 'Chat', icon: MessageSquareText },
   { id: 'materiais', label: 'Materiais', icon: Database },
@@ -195,7 +183,7 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }) {
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top">
         <div className="brand">
-          <BrandMark />
+          <BrandMark variant="lavender" size={38} />
           {!collapsed && (
             <div>
               <strong>JARVIS</strong>
@@ -293,7 +281,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`message ${isUser ? 'user' : 'assistant'}`}>
       <div className="message-avatar">
-        {isUser ? <GraduationCap size={18} /> : <BrandMark />}
+        {isUser ? <GraduationCap size={18} /> : <BrandMark variant="lavender" size={30} />}
       </div>
       <div className="message-body">
         <div className="message-meta">
@@ -383,7 +371,7 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
         ))}
         {isLoading && (
           <article className="message assistant loading">
-            <div className="message-avatar"><BrandMark /></div>
+            <div className="message-avatar"><BrandMark variant="lavender" size={30} /></div>
             <div className="message-body">
               <div className="message-meta"><strong>JARVIS</strong><span>pensando...</span></div>
               <div className="typing"><span /><span /><span /></div>

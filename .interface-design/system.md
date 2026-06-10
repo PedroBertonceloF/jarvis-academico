@@ -6,7 +6,7 @@ Usuário: aluno de Computação estudando IA e avaliador técnico do projeto.
 
 Tarefa principal: estudar com suporte de IA, consultar fontes, organizar tarefas e verificar evidências de RAG/tool calling.
 
-Sensação desejada: acadêmico, técnico, organizado e rastreável.
+Sensação desejada: acadêmico, técnico, organizado, premium, cósmico e rastreável.
 
 ## Domain
 
@@ -16,14 +16,15 @@ Estudos, fontes, RAG, revisão ativa, evidências, chunks, scores, tool calling,
 
 - Fundo escuro técnico para foco prolongado.
 - Superfícies escuras levemente elevadas para separar áreas de trabalho.
-- Ciano para evidência, RAG e foco ativo.
-- Violeta como acento de IA.
+- Lavanda `#8A83DA` para identidade, RAG, foco ativo, avatar, links e botões principais.
+- Violeta profundo `#463699` para seleção e superfícies ativas.
+- Violeta elétrico `#3A0CA3` apenas para halo ambiental e profundidade discreta.
 - Amarelo/dourado para alertas e atenção acadêmica.
-- Verde para sucesso e estados fundamentados.
+- Verde somente para sucesso, concluído ou online.
 
 ## Signature
 
-Painel de evidências/fonte/RAG sempre próximo da conversa. A interface deve deixar claro quando a resposta veio de fonte recuperada, ferramenta interna ou fallback.
+Símbolo orbital oficial e painel de evidências/fonte/RAG sempre próximos da conversa. A interface deve deixar claro quando a resposta veio de fonte recuperada, ferramenta interna ou fallback.
 
 ## Defaults a rejeitar
 
@@ -37,7 +38,7 @@ Painel de evidências/fonte/RAG sempre próximo da conversa. A interface deve de
 - Superfícies: `--surface`, `--surface-strong`, `--surface-soft`.
 - Bordas: `--border` e `--border-strong`.
 - Texto: `--text`, `--text-muted`, `--text-soft`.
-- Acentos: `--cyan`, `--violet`, `--gold`, `--green`, `--red`.
+- Acentos: `--brand`, `--brand-deep`, `--brand-electric`, `--warning`, `--success`, `--danger`.
 - Raios: `--radius-xl`, `--radius-lg`, `--radius-md`.
 - Profundidade: sombras amplas em contêineres principais e surface shifts em componentes internos.
 

@@ -2,7 +2,7 @@
 title: JARVIS Acadêmico
 emoji: 🧠
 colorFrom: indigo
-colorTo: blue
+colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
@@ -16,7 +16,7 @@ pinned: false
 ![Docker](https://img.shields.io/badge/Docker-Deploy-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
 ![LLM](https://img.shields.io/badge/LLM%20Remota-OpenAI--compatible-7B61FF?style=for-the-badge)
-![RAG](https://img.shields.io/badge/RAG-Ativo-00B894?style=for-the-badge)
+![RAG](https://img.shields.io/badge/RAG-Ativo-8A83DA?style=for-the-badge)
 
 > Assistente acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos de Inteligência Artificial, combinando **RAG**, **LLM remota OpenAI-compatible**, **tool calling**, upload de documentos, revisão ativa e painel de evidências técnicas.
 
@@ -31,6 +31,7 @@ pinned: false
 ## Sumário
 
 - [Objetivo do projeto](#-objetivo-do-projeto)
+- [Identidade visual](#-identidade-visual)
 - [Critérios de avaliação atendidos](#-critérios-de-avaliação-atendidos)
 - [Funcionalidades principais](#-funcionalidades-principais)
 - [Origem dos dados do dataset](#-origem-dos-dados-do-dataset)
@@ -65,6 +66,40 @@ O projeto tem como objetivos principais:
 - registrar evidências técnicas de tool calling;
 - demonstrar integração real com a LLM remota fornecida para o trabalho;
 - apoiar o aprendizado de forma transparente e rastreável.
+
+---
+
+## Identidade visual
+
+A identidade atual usa o símbolo aprovado **F01 / C01 — Convergência orbital**, criado para representar três trajetórias orbitais, múltiplas fontes, síntese, decisão e aprendizagem contínua.
+
+A interface é **dark-only** e segue a proporção visual:
+
+```text
+80% editorial escuro + 20% energia violeta cósmica
+```
+
+Paleta principal:
+
+- fundo: `#050505`;
+- texto/paper: `#FBF5F0`;
+- marca lavanda: `#8A83DA`;
+- violeta profundo: `#463699`;
+- violeta elétrico ambiental: `#3A0CA3`.
+
+O verde fica restrito a estados semânticos de sucesso, concluído ou online. A marca, o avatar do assistente, o item ativo, o RAG e os botões principais usam lavanda.
+
+Assets de produção ficam em:
+
+```text
+frontend/public/brand/
+```
+
+Detalhes completos estão em:
+
+```text
+docs/BRAND_IDENTITY.md
+```
 
 ---
 

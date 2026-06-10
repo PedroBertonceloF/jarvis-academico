@@ -36,6 +36,7 @@ FRONTEND_DIR = ROOT_DIR / "frontend"
 FRONTEND_DIST_DIR = FRONTEND_DIR / "dist"
 FRONTEND_DIST_INDEX = FRONTEND_DIST_DIR / "index.html"
 FRONTEND_DIST_ASSETS = FRONTEND_DIST_DIR / "assets"
+FRONTEND_DIST_BRAND = FRONTEND_DIST_DIR / "brand"
 UPLOADS_DIR = settings.data_dir / "uploads"
 LOG_PATH = settings.log_dir / "tool_calls.jsonl"
 
@@ -58,6 +59,8 @@ app.add_middleware(
 
 if FRONTEND_DIST_ASSETS.exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST_ASSETS)), name="assets")
+if FRONTEND_DIST_BRAND.exists():
+    app.mount("/brand", StaticFiles(directory=str(FRONTEND_DIST_BRAND)), name="brand")
 
 _rag_engine: RagEngine | None = None
 _agent: JarvisAgent | None = None
