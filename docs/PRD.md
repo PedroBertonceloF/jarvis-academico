@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Desenvolver um assistente acadêmico capaz de apoiar estudantes na organização dos estudos usando **RAG**, **tool calling** e a **LLM Gemma 12B via API LIA/UFMS**.
+Desenvolver um assistente acadêmico capaz de apoiar estudantes na organização dos estudos usando **RAG**, **tool calling** e uma **LLM remota OpenAI-compatible via API LIA/UFMS**.
 
 ---
 
@@ -83,13 +83,13 @@ Esse requisito torna o sistema mais útil como tutor sem comprometer a transpar�
 - Banco de dados remoto.
 - Multiusuário com controle de permissões.
 - Coleta automática de dados da internet.
-- Uso ilimitado da API Gemma.
+- Uso ilimitado da API LLM.
 
 ---
 
 ## Critérios de sucesso
 
-- O sistema executa de ponta a ponta no modo Gemma.
+- O sistema executa de ponta a ponta no modo remoto (`LLM_MODE=gemma` legado ou `LLM_MODE=qwen`).
 - O deploy oficial roda no Hugging Face Spaces.
 - As ferramentas são chamadas pela LLM e registradas em log.
 - O RAG recupera documentos relevantes e apresenta fontes.

@@ -16,15 +16,18 @@ for directory in [DATA_DIR, STORAGE_DIR, LOG_DIR]:
 
 load_dotenv(ROOT_DIR / ".env")
 
+REMOTE_LLM_MODES = {"gemma", "qwen", "remote", "openai_compatible", "openai-compatible"}
+
 
 @dataclass(frozen=True)
 class Settings:
     # Use LLM_MODE=mock para testar sem o token do professor.
-    # Use LLM_MODE=gemma na entrega final, com GEMMA_API_KEY preenchido.
+    # Use LLM_MODE=gemma na entrega final para manter compatibilidade com o deploy.
+    # Os nomes GEMMA_* são legados: hoje configuram um cliente LLM remoto OpenAI-compatible.
     llm_mode: str = os.getenv("LLM_MODE", "mock").strip().lower()
     gemma_base_url: str = os.getenv("GEMMA_BASE_URL", "")
     gemma_api_key: str = os.getenv("GEMMA_API_KEY", "")
-    gemma_model: str = os.getenv("GEMMA_MODEL", "google/gemma-3-12b-it")
+    gemma_model: str = os.getenv("GEMMA_MODEL", "Qwen/Qwen2.5-14B-Instruct-AWQ")
     embedding_model: str = os.getenv(
         "EMBEDDING_MODEL",
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
@@ -34,17 +37,41 @@ class Settings:
     log_dir: Path = LOG_DIR
 
     @property
+    def llm_mode_normalizado(self) -> str:
+        return str(self.llm_mode or "").strip().lower()
+
+    @property
     def usando_mock(self) -> bool:
-        return self.llm_mode == "mock"
+        return self.llm_mode_normalizado == "mock"
+
+    @property
+    def usando_llm_remota(self) -> bool:
+        return self.llm_mode_normalizado in REMOTE_LLM_MODES
+
+    @property
+    def llm_provider(self) -> str:
+        return "mock" if self.usando_mock else "openai-compatible"
+
+    @property
+    def llm_provider_label(self) -> str:
+        return str(self.gemma_model or "").strip() or "LLM remota OpenAI-compatible"
 
     def validate_llm(self) -> None:
         if self.usando_mock:
             return
 
+        if not self.usando_llm_remota:
+            raise RuntimeError(
+                "LLM_MODE inválido: "
+                + self.llm_mode_normalizado
+                + ". Use mock, gemma, qwen, remote ou openai_compatible."
+            )
+
         missing = []
-        if not self.gemma_base_url:
+        if not str(self.gemma_base_url or "").strip():
             missing.append("GEMMA_BASE_URL")
-        if not self.gemma_api_key or self.gemma_api_key in {"COLE_SEU_TOKEN_AQUI", "COLE_A_CHAVE_AQUI"}:
+        api_key = str(self.gemma_api_key or "").strip()
+        if not api_key or api_key in {"COLE_SEU_TOKEN_AQUI", "COLE_A_CHAVE_AQUI"}:
             missing.append("GEMMA_API_KEY")
         if missing:
             raise RuntimeError(

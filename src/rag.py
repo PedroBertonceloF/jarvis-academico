@@ -144,6 +144,7 @@ class RagEngine:
         self.matriz_emb: np.ndarray | None = None
         self.indice_faiss = None
         self.indice_bm25 = None
+        self.modo_recuperacao_atual = "nao_indexado"
         if carregar_agora:
             self.reindexar()
 
@@ -168,6 +169,7 @@ class RagEngine:
             self.indice_bm25 = None
             self.indice_faiss = None
             self.matriz_emb = None
+            self.modo_recuperacao_atual = "vazio"
             return {"documentos": 0, "chunks": 0}
 
         corpus_tokenizado = [tokenizar(c["texto"]) for c in self.chunks]
@@ -179,26 +181,41 @@ class RagEngine:
             self.modelo_embed = None
             self.matriz_emb = None
             self.indice_faiss = None
+            self.modo_recuperacao_atual = "lexical_bm25"
             return {
                 "documentos": len(self.docs),
                 "chunks": len(self.chunks),
-                "modo_recuperacao": "lexical_bm25",
+                "modo_recuperacao": self.modo_recuperacao_atual,
             }
 
-        self.modelo_embed = _carregar_sentence_transformer()
-        textos = [c["texto"] for c in self.chunks]
-        self.matriz_emb = self.modelo_embed.encode(
-            textos,
-            normalize_embeddings=True,
-            show_progress_bar=False,
-        ).astype("float32")
+        try:
+            self.modelo_embed = _carregar_sentence_transformer()
+            textos = [c["texto"] for c in self.chunks]
+            self.matriz_emb = self.modelo_embed.encode(
+                textos,
+                normalize_embeddings=True,
+                show_progress_bar=False,
+            ).astype("float32")
 
-        self.indice_faiss = _criar_indice_faiss(self.matriz_emb.shape[1])
-        self.indice_faiss.add(self.matriz_emb)
+            self.indice_faiss = _criar_indice_faiss(self.matriz_emb.shape[1])
+            self.indice_faiss.add(self.matriz_emb)
+        except (ImportError, ModuleNotFoundError) as exc:
+            self.modelo_embed = None
+            self.matriz_emb = None
+            self.indice_faiss = None
+            self.modo_recuperacao_atual = "lexical_bm25_fallback"
+            return {
+                "documentos": len(self.docs),
+                "chunks": len(self.chunks),
+                "modo_recuperacao": self.modo_recuperacao_atual,
+                "aviso": f"Busca densa indisponível: {exc.__class__.__name__}. Usando BM25.",
+            }
+
+        self.modo_recuperacao_atual = "hibrido_dense_bm25"
         return {
             "documentos": len(self.docs),
             "chunks": len(self.chunks),
-            "modo_recuperacao": "hibrido_dense_bm25",
+            "modo_recuperacao": self.modo_recuperacao_atual,
         }
 
     def _garantir_indice(self) -> None:
@@ -266,7 +283,7 @@ class RagEngine:
             "termos_encontrados_no_contexto": termos_encontrados,
             "qtd_termos_encontrados": len(termos_encontrados),
             "score_dense_top": round(score_dense_top, 4),
-            "modo_recuperacao": "lexical_bm25" if modo_rag_lexical() else "hibrido_dense_bm25",
+            "modo_recuperacao": self.modo_recuperacao_atual,
         }
 
     def _resultado_vazio(self, diagnostico: dict) -> bool:

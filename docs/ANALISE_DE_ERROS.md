@@ -48,11 +48,11 @@ O stack de IA local é pesado para planos gratuitos:
 
 ### Correção
 
-Foi previsto o uso de `RAG_MODE=lexical` em ambientes mais restritos e `RAG_MODE=hibrido` em ambientes com mais memória.
+Foi previsto o uso de `RAG_MODE=lexical` em ambientes mais restritos e `RAG_MODE=hibrido` em ambientes com mais memória. Além disso, se o modo híbrido estiver configurado mas as dependências densas (`sentence-transformers`/FAISS) não estiverem disponíveis no ambiente, o RAG cai automaticamente para `lexical_bm25_fallback`.
 
 ### Resultado
 
-A arquitetura ficou adaptável ao ambiente de deploy.
+A arquitetura ficou adaptável ao ambiente de deploy e evita que a ausência de dependências densas derrube `/api/status` ou o fluxo básico de recuperação.
 
 ---
 
@@ -80,7 +80,7 @@ O erro 401 foi eliminado.
 
 ---
 
-## 4. Falha: timeout na chamada da Gemma
+## 4. Falha: timeout na chamada da LLM
 
 ### Sintoma
 
@@ -109,11 +109,11 @@ Também foi criado o endpoint:
 /api/debug/gemma-ping
 ```
 
-para testar a Gemma sem RAG e sem tool calling.
+para testar a LLM remota sem RAG e sem tool calling.
 
 ### Resultado
 
-O teste retornou `OK`, provando que o Hugging Face conseguia acessar a API Gemma.
+O teste retornou `OK`, provando que o Hugging Face conseguia acessar a API LLM.
 
 ---
 
@@ -183,3 +183,36 @@ O estado recolhido passou a organizar a logo e o botão verticalmente, centraliz
 ### Resultado
 
 O menu recolhido ficou limpo e responsivo.
+
+---
+
+## 8. Falha: nomes legados da LLM confundindo o deploy
+
+### Sintoma
+
+O projeto ainda usava mensagens e documentação falando em Gemma, mas o endpoint configurado no Hugging Face apontava para Qwen:
+
+```env
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
+```
+
+Isso dificultava diagnosticar se uma falha vinha do código, da chave, do endpoint, do modelo ou do ambiente do Space.
+
+### Causa
+
+As variáveis `GEMMA_*` já estavam incorporadas ao código e ao deploy. Elas viraram nomes legados, mas continuavam sendo exibidas como se o provedor atual fosse necessariamente Gemma.
+
+### Correção
+
+O backend passou a tratar `gemma`, `qwen`, `remote` e `openai_compatible` como modos remotos válidos. As mensagens de erro foram neutralizadas para "API LLM", e os endpoints de diagnóstico passaram a retornar:
+
+- provider OpenAI-compatible;
+- modelo real configurado;
+- presença e tamanho da chave, sem expor o valor;
+- base URL configurada;
+- tipo e mensagem segura do erro.
+
+### Resultado
+
+O deploy continua compatível com `LLM_MODE=gemma` e `GEMMA_*`, mas a interface e a documentação indicam que esses nomes são legados e que o modelo atual é Qwen.

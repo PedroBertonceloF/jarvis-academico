@@ -10,7 +10,7 @@ Frontend React
   ▼
 Backend FastAPI
   ├── Agente acadêmico
-  ├── Cliente LLM Gemma
+  ├── Cliente LLM remoto OpenAI-compatible
   ├── Tool calling
   ├── RAG
   ├── Storage
@@ -70,7 +70,7 @@ Responsabilidades:
 - receber upload de arquivos;
 - expor status do sistema;
 - expor logs;
-- diagnosticar Gemma;
+- diagnosticar a LLM remota;
 - integrar agente, RAG, ferramentas e storage.
 
 ---
@@ -106,19 +106,22 @@ Modos:
 
 | Modo | Função |
 |---|---|
-| `gemma` | Usa a API Gemma 12B fornecida. |
+| `gemma` | Modo legado do deploy; usa a API LLM remota OpenAI-compatible. |
+| `qwen`, `remote`, `openai_compatible` | Sinônimos aceitos para a mesma integração remota. |
 | `mock` | Modo auxiliar local para desenvolvimento sem consumo de API. Não é o modo oficial da entrega. |
 
 Variáveis principais:
 
 ```env
 LLM_MODE=gemma
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 GEMMA_API_KEY=...
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
 ```
+
+Os nomes `GEMMA_*` são mantidos por compatibilidade com o histórico do projeto e com o Space já configurado. No endpoint atual, eles apontam para Qwen.
 
 ---
 

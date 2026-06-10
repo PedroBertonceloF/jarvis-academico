@@ -4,24 +4,22 @@ import remarkGfm from 'remark-gfm';
 import {
   ArrowRight,
   AlertTriangle,
-  BookOpen,
   BrainCircuit,
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
-  ChevronRight,
   Database,
   FileSearch,
   FileText,
   Gauge,
   GitBranch,
   GraduationCap,
-  Layers3,
   ListTodo,
   Loader2,
   Menu,
   MessageSquareText,
-  Moon,
+  PanelRightClose,
+  PanelRightOpen,
   Paperclip,
   RefreshCcw,
   Search,
@@ -30,7 +28,6 @@ import {
   Sparkles,
   TerminalSquare,
   UploadCloud,
-  X,
   Zap,
 } from 'lucide-react';
 
@@ -87,11 +84,16 @@ function humanToolName(tool) {
   const names = {
     buscar_material_rag: 'Busca RAG',
     consultar_agenda: 'Agenda',
+    adicionar_evento: 'Novo evento',
     listar_tarefas: 'Tarefas',
     adicionar_tarefa: 'Nova tarefa',
     concluir_tarefa: 'Concluir tarefa',
     planejar_estudos: 'Plano de estudo',
     gerar_exercicios: 'Exercícios',
+    iniciar_revisao: 'Revisão ativa',
+    avaliar_resposta_revisao: 'Avaliar revisão',
+    registrar_dificuldade: 'Registrar dificuldade',
+    listar_dificuldades: 'Dificuldades',
   };
   return names[tool] || tool || 'Ferramenta';
 }
@@ -107,6 +109,24 @@ function inferMode(toolCalls = []) {
 
 function formatScore(score) {
   return typeof score === 'number' ? score.toFixed(3) : '—';
+}
+
+function getLlmStatusLabel(status) {
+  if (!status) return 'carregando';
+  if (status.usando_mock) return 'mock';
+
+  const model = status.llm_provider_label || status.llm_model || status.gemma_model || '';
+  if (/qwen/i.test(model)) return 'Qwen remoto';
+  if (/gemma/i.test(model)) return 'Gemma remoto';
+  return status.llm_provider || status.modo_llm || status.llm_mode || 'LLM remota';
+}
+
+function getLlmStatusTitle(status) {
+  if (!status) return 'Carregando status da LLM';
+  return [
+    status.llm_provider || 'LLM',
+    status.llm_provider_label || status.llm_model || status.gemma_model || status.modo_llm,
+  ].filter(Boolean).join(' · ');
 }
 
 function getLogDocs(log) {
@@ -149,30 +169,33 @@ function getEvidenceMetrics(logs = []) {
   };
 }
 
-function BrandOrb() {
+function BrandMark() {
   return (
-    <div className="brand-orb" aria-hidden="true">
-      <span />
-      <span />
-      <span />
-    </div>
+    <svg className="brand-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <rect x="6" y="6" width="36" height="36" rx="12" />
+      <path d="M27 13v16.4c0 5.2-3.1 7.6-7.4 7.6-2.1 0-4-.5-5.6-1.5" />
+      <path d="M19 21h14" />
+      <circle cx="34" cy="16" r="3" />
+      <circle cx="35" cy="31" r="2.5" />
+      <path d="M33.2 18.6 28 24l5.4 5.3" />
+    </svg>
   );
 }
 
-function Sidebar({ active, setActive, collapsed, setCollapsed }) {
-  const items = [
-    { id: 'chat', label: 'Chat', icon: MessageSquareText },
-    { id: 'materiais', label: 'Materiais', icon: Database },
-    { id: 'tarefas', label: 'Tarefas', icon: ListTodo },
-    { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-    { id: 'logs', label: 'Evidências', icon: TerminalSquare },
-  ];
+const navigationItems = [
+  { id: 'chat', label: 'Chat', icon: MessageSquareText },
+  { id: 'materiais', label: 'Materiais', icon: Database },
+  { id: 'tarefas', label: 'Tarefas', icon: ListTodo },
+  { id: 'agenda', label: 'Agenda', icon: CalendarDays },
+  { id: 'logs', label: 'Evidências', icon: TerminalSquare },
+];
 
+function Sidebar({ active, setActive, collapsed, setCollapsed }) {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top">
         <div className="brand">
-          <BrandOrb />
+          <BrandMark />
           {!collapsed && (
             <div>
               <strong>JARVIS</strong>
@@ -180,19 +203,27 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }) {
             </div>
           )}
         </div>
-        <button className="icon-button ghost" onClick={() => setCollapsed(!collapsed)} title="Alternar menu">
+        <button
+          className="icon-button ghost"
+          onClick={() => setCollapsed(!collapsed)}
+          title="Alternar menu"
+          aria-label="Alternar menu lateral"
+        >
           <Menu size={18} />
         </button>
       </div>
 
       <nav className="nav-list">
-        {items.map((item) => {
+        {navigationItems.map((item) => {
           const Icon = item.icon;
           return (
             <button
               key={item.id}
               className={`nav-item ${active === item.id ? 'active' : ''}`}
               onClick={() => setActive(item.id)}
+              title={collapsed ? item.label : undefined}
+              aria-label={item.label}
+              aria-current={active === item.id ? 'page' : undefined}
             >
               <Icon size={18} />
               {!collapsed && <span>{item.label}</span>}
@@ -203,25 +234,49 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }) {
 
       {!collapsed && (
         <div className="sidebar-card">
-          <div className="mini-label">Missão</div>
-          <p>Organizar materiais, estudar com foco e registrar evidências técnicas do aprendizado.</p>
+          <div className="mini-label">Linha de trabalho</div>
+          <p>Estudo com fontes, ferramentas e evidências auditáveis.</p>
         </div>
       )}
     </aside>
   );
 }
 
+function MobileNav({ active, setActive }) {
+  return (
+    <nav className="mobile-nav" aria-label="Navegação principal">
+      {navigationItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <button
+            key={item.id}
+            className={`mobile-nav-item ${active === item.id ? 'active' : ''}`}
+            onClick={() => setActive(item.id)}
+            aria-label={item.label}
+            aria-current={active === item.id ? 'page' : undefined}
+          >
+            <Icon size={18} />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 function StatusBar({ status, onRefresh }) {
   const base = status?.base_rag || {};
+  const llmStatusClass = status?.usando_mock ? 'mock' : 'remote';
   return (
     <header className="topbar">
       <div>
-        <div className="eyebrow"><Sparkles size={14} /> Study workspace</div>
-        <h1>Copiloto acadêmico com RAG e tool calling</h1>
+        <div className="eyebrow"><Sparkles size={14} /> Espaço de estudo</div>
+        <h1>JARVIS Acadêmico</h1>
+        <p className="topbar-copy">Consulta, planejamento e evidências em uma única sessão.</p>
       </div>
       <div className="topbar-actions">
-        <span className={`status-pill ${status?.usando_mock ? 'mock' : 'gemma'}`}>
-          <Gauge size={14} /> {status?.modo_llm || 'carregando'}
+        <span className={`status-pill ${llmStatusClass}`} title={getLlmStatusTitle(status)}>
+          <Gauge size={14} /> {getLlmStatusLabel(status)}
         </span>
         <span className="status-pill"><Database size={14} /> {base.chunks ?? 0} chunks</span>
         <button className="icon-button" onClick={onRefresh} title="Atualizar status">
@@ -238,7 +293,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`message ${isUser ? 'user' : 'assistant'}`}>
       <div className="message-avatar">
-        {isUser ? <GraduationCap size={18} /> : <BrandOrb />}
+        {isUser ? <GraduationCap size={18} /> : <BrandMark />}
       </div>
       <div className="message-body">
         <div className="message-meta">
@@ -268,12 +323,17 @@ function MessageBubble({ message }) {
 }
 
 function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickPrompt, refreshAll, onUploadResult }) {
-  const bottomRef = useRef(null);
+  const messagesAreaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const messagesArea = messagesAreaRef.current;
+    if (!messagesArea) return;
+    const frame = requestAnimationFrame(() => {
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
   }, [messages, isLoading]);
 
   async function handleComposerUpload(event) {
@@ -305,7 +365,7 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
         </div>
         <div className="session-actions">
           <span><ShieldCheck size={15} /> Governança de fonte</span>
-          <span><Zap size={15} /> Tutor mode</span>
+          <span><Zap size={15} /> Modo tutor</span>
         </div>
       </div>
 
@@ -317,20 +377,19 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
         ))}
       </div>
 
-      <div className="messages-area">
+      <div className="messages-area" ref={messagesAreaRef}>
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
         {isLoading && (
           <article className="message assistant loading">
-            <div className="message-avatar"><BrandOrb /></div>
+            <div className="message-avatar"><BrandMark /></div>
             <div className="message-body">
               <div className="message-meta"><strong>JARVIS</strong><span>pensando...</span></div>
               <div className="typing"><span /><span /><span /></div>
             </div>
           </article>
         )}
-        <div ref={bottomRef} />
       </div>
 
       <form className="composer" onSubmit={onSubmit}>
@@ -346,6 +405,7 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
           type="button"
           className="composer-icon"
           title="Anexar materiais à base RAG"
+          aria-label="Anexar materiais à base RAG"
           disabled={isUploading}
           onClick={() => fileInputRef.current?.click()}
         >
@@ -363,7 +423,7 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
           placeholder="Pergunte ao JARVIS sobre seus estudos..."
           rows={1}
         />
-        <button className="send-button" disabled={isLoading || !input.trim()}>
+        <button className="send-button" disabled={isLoading || !input.trim()} aria-label="Enviar mensagem">
           {isLoading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}
         </button>
       </form>
@@ -371,12 +431,27 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
   );
 }
 
-function ContextPanel({ selectedMessage, logs, tasks, agenda, status }) {
+function ContextPanel({ selectedMessage, logs, tasks, agenda, status, collapsed, onToggle }) {
   const toolCalls = selectedMessage?.tool_calls || [];
   const sources = selectedMessage?.sources || [];
 
   return (
-    <aside className="context-panel">
+    <aside className={`context-panel ${collapsed ? 'collapsed' : ''}`} aria-label="Inspector acadêmico">
+      <div className="inspector-head">
+        <div>
+          <span className="mini-label">Inspector</span>
+          <h2>Contexto acadêmico</h2>
+        </div>
+        <button
+          className="icon-button ghost"
+          onClick={onToggle}
+          title={collapsed ? 'Expandir inspector' : 'Recolher inspector'}
+          aria-label={collapsed ? 'Expandir inspector acadêmico' : 'Recolher inspector acadêmico'}
+        >
+          {collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}
+        </button>
+      </div>
+
       <section className="context-card glow-card">
         <div className="context-title"><BrainCircuit size={17} /> Estado do sistema</div>
         <div className="metric-grid">
@@ -544,7 +619,11 @@ function TasksView({ tasks, refresh }) {
               <strong>{task.titulo}</strong>
               <span>{task.disciplina} • {task.prazo || 'sem prazo'} • {task.prioridade}</span>
             </div>
-            {!task.concluida && <button className="icon-button" onClick={() => completeTask(task.id)}><CheckCircle2 size={18} /></button>}
+            {!task.concluida && (
+              <button className="icon-button" onClick={() => completeTask(task.id)} aria-label={`Concluir tarefa ${task.titulo}`}>
+                <CheckCircle2 size={18} />
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -694,7 +773,7 @@ function LogsView({ logs }) {
         <div className="criterion-list">
           <span><CheckCircle2 size={15} /> RAG com documentos, chunks e scores</span>
           <span><CheckCircle2 size={15} /> Tool calling com entrada e saída</span>
-          <span><CheckCircle2 size={15} /> Integração real com Gemma via API</span>
+          <span><CheckCircle2 size={15} /> Integração real com LLM remota via API</span>
           <span><CheckCircle2 size={15} /> Erros e fallback acadêmico controlados</span>
         </div>
       </div>
@@ -726,6 +805,7 @@ function ChatWorkspace({ active, ...props }) {
 export default function App() {
   const [active, setActive] = useState('chat');
   const [collapsed, setCollapsed] = useState(false);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const [status, setStatus] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [agenda, setAgenda] = useState([]);
@@ -836,7 +916,7 @@ export default function App() {
       <Sidebar active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} />
       <main className="main-area">
         <StatusBar status={status} onRefresh={refreshAll} />
-        <div className="workspace-grid">
+        <div className={`workspace-grid ${inspectorCollapsed ? 'inspector-collapsed' : ''}`}>
           <ChatWorkspace
             active={active}
             messages={messages}
@@ -852,9 +932,18 @@ export default function App() {
             refreshAll={refreshAll}
             onUploadResult={handleUploadResult}
           />
-          <ContextPanel selectedMessage={selectedMessage} logs={logs} tasks={tasks} agenda={agenda} status={status} />
+          <ContextPanel
+            selectedMessage={selectedMessage}
+            logs={logs}
+            tasks={tasks}
+            agenda={agenda}
+            status={status}
+            collapsed={inspectorCollapsed}
+            onToggle={() => setInspectorCollapsed((current) => !current)}
+          />
         </div>
       </main>
+      <MobileNav active={active} setActive={setActive} />
     </div>
   );
 }

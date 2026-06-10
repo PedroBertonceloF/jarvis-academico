@@ -78,7 +78,7 @@ http://127.0.0.1:8000
 
 ## Observações de segurança
 
-- A chave da Gemma nunca deve ir para o frontend.
+- A chave da LLM nunca deve ir para o frontend.
 - O frontend chama apenas o backend.
 - A variável `GEMMA_API_KEY` deve ficar no `.env` local ou no painel de variáveis do serviço de deploy.
 - `frontend/.env` e `frontend/.env.local` estão ignorados pelo Git.

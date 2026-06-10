@@ -10,11 +10,11 @@ Alunos de Computação estudando Inteligência Artificial e disciplinas relacion
 
 ## Solução
 
-Assistente acadêmico com RAG, Gemma 12B, tool calling, upload de documentos, revisão ativa, registro de dificuldades, tarefas, agenda e painel de evidências.
+Assistente acadêmico com RAG, LLM remota OpenAI-compatible, tool calling, upload de documentos, revisão ativa, registro de dificuldades, tarefas, agenda e painel de evidências.
 
 ## Minha contribuição
 
-A confirmar no detalhe. Pelo repositório, o projeto inclui backend FastAPI, frontend React, agente acadêmico, integração Gemma/LIA, RAG, ferramentas internas, persistência local, testes, documentação técnica e deploy no Hugging Face Spaces.
+A confirmar no detalhe. Pelo repositório, o projeto inclui backend FastAPI, frontend React, agente acadêmico, integração LLM/LIA, RAG, ferramentas internas, persistência local, testes, documentação técnica e deploy no Hugging Face Spaces.
 
 ## Stack
 
@@ -22,7 +22,7 @@ A confirmar no detalhe. Pelo repositório, o projeto inclui backend FastAPI, fro
 - FastAPI
 - React
 - Vite
-- Gemma 12B via API LIA/UFMS
+- LLM remota via API LIA/UFMS
 - RAG lexical/híbrido
 - Docker
 - Hugging Face Spaces
@@ -30,7 +30,7 @@ A confirmar no detalhe. Pelo repositório, o projeto inclui backend FastAPI, fro
 
 ## Arquitetura
 
-O frontend React conversa com uma API FastAPI. A API orquestra um agente acadêmico que pode chamar ferramentas internas, recuperar documentos via RAG, registrar evidências, lidar com fallback e acionar a Gemma 12B para gerar respostas.
+O frontend React conversa com uma API FastAPI. A API orquestra um agente acadêmico que pode chamar ferramentas internas, recuperar documentos via RAG, registrar evidências, lidar com fallback e acionar a LLM remota para gerar respostas.
 
 ## Funcionalidades principais
 
@@ -46,7 +46,7 @@ O frontend React conversa com uma API FastAPI. A API orquestra um agente acadêm
 
 ## Decisões técnicas
 
-- Usar Gemma 12B como LLM principal para atender ao requisito acadêmico.
+- Usar a LLM remota fornecida como modelo principal para atender ao requisito acadêmico.
 - Mostrar evidências de RAG e tool calling em vez de esconder a orquestração.
 - Manter fallback explícito quando o dataset não cobre a pergunta.
 - Documentar limitações do dataset inicial.

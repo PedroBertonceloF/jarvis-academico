@@ -8,17 +8,17 @@ app_port: 7860
 pinned: false
 ---
 
-# JARVIS Acadêmico — Assistente com RAG, Gemma 12B e Tool Calling
+# JARVIS Acadêmico — Assistente com RAG, LLM remota e Tool Calling
 
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Docker](https://img.shields.io/badge/Docker-Deploy-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
-![Gemma](https://img.shields.io/badge/Gemma%2012B-LLM-7B61FF?style=for-the-badge)
+![LLM](https://img.shields.io/badge/LLM%20Remota-OpenAI--compatible-7B61FF?style=for-the-badge)
 ![RAG](https://img.shields.io/badge/RAG-Ativo-00B894?style=for-the-badge)
 
-> Assistente acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos de Inteligência Artificial, combinando **RAG**, **Gemma 12B**, **tool calling**, upload de documentos, revisão ativa e painel de evidências técnicas.
+> Assistente acadêmico desenvolvido para apoiar estudantes na organização dos estudos e na compreensão de conteúdos de Inteligência Artificial, combinando **RAG**, **LLM remota OpenAI-compatible**, **tool calling**, upload de documentos, revisão ativa e painel de evidências técnicas.
 
 ## Links principais
 
@@ -36,9 +36,10 @@ pinned: false
 - [Origem dos dados do dataset](#-origem-dos-dados-do-dataset)
 - [Arquitetura](#-arquitetura)
 - [RAG](#-rag)
-- [Integração com Gemma 12B](#-integração-com-gemma-12b)
+- [Integração com LLM remota](#-integração-com-llm-remota)
 - [Tool calling](#-tool-calling)
 - [Avaliação, erros e governança](#-avaliação-erros-e-governança)
+- [Checklist do Trabalho 2](#-checklist-do-trabalho-2)
 - [Como executar localmente](#-como-executar-localmente)
 - [Como testar](#-como-testar)
 - [Deploy](#-deploy)
@@ -62,7 +63,7 @@ O projeto tem como objetivos principais:
 - registrar dificuldades do aluno;
 - iniciar sessões de revisão ativa;
 - registrar evidências técnicas de tool calling;
-- demonstrar integração real com a LLM Gemma 12B;
+- demonstrar integração real com a LLM remota fornecida para o trabalho;
 - apoiar o aprendizado de forma transparente e rastreável.
 
 ---
@@ -74,7 +75,7 @@ O projeto tem como objetivos principais:
 | **Funcionalidade** | 20% | Chat, upload, tarefas, agenda, revisão ativa, plano de estudos e deploy online. |
 | **RAG** | 20% | Chunking, recuperação de documentos, fontes, scores e uso de contexto na resposta. |
 | **Tool calling** | 15% | Ferramentas internas acionadas pelo agente e exibidas no painel de evidências. |
-| **Avaliação + erros** | 20% | Fallback acadêmico, tratamento de timeout, token inválido, ausência de contexto e diagnóstico da Gemma. |
+| **Avaliação + erros** | 20% | Fallback acadêmico, tratamento de timeout, token inválido, ausência de contexto e diagnóstico da LLM. |
 | **Aprendizado** | 15% | Explicações, exercícios, plano de estudos, revisão ativa e registro de dificuldades. |
 | **Engenharia** | 10% | React, FastAPI, Docker, testes, variáveis de ambiente, GitHub e Hugging Face Spaces. |
 
@@ -122,7 +123,7 @@ Os arquivos enviados são processados, divididos em chunks e incorporados ao mec
 
 ### Revisão ativa
 
-O sistema permite iniciar sessões de revisão ativa. A ideia é gerar uma pergunta com base nos materiais, receber a resposta do aluno e avaliar a resposta usando a Gemma.
+O sistema permite iniciar sessões de revisão ativa. A ideia é gerar uma pergunta com base nos materiais, receber a resposta do aluno e avaliar a resposta usando a LLM remota.
 
 Essa funcionalidade contribui diretamente para o critério de **aprendizado**, pois transforma o assistente em uma ferramenta de prática, não apenas de consulta.
 
@@ -205,7 +206,7 @@ graph TD;
     D --> F[Agenda e Tarefas];
     D --> G[Revisão Ativa];
     D --> H[Dificuldades];
-    C --> I[Gemma 12B via API LIA/UFMS];
+    C --> I[LLM remota via API LIA/UFMS];
     E --> I;
 ```
 
@@ -216,7 +217,7 @@ graph TD;
 | `frontend/` | Interface web em React. |
 | `web_api/` | API FastAPI usada pelo frontend. |
 | `src/agent.py` | Orquestra o comportamento do assistente. |
-| `src/llm_client.py` | Integração com a API Gemma. |
+| `src/llm_client.py` | Integração com a API LLM remota OpenAI-compatible. |
 | `src/rag.py` | Indexação e recuperação dos documentos. |
 | `src/tools.py` | Ferramentas chamadas pelo agente. |
 | `src/learning.py` | Funcionalidades de revisão ativa e dificuldades. |
@@ -279,24 +280,24 @@ Escolhemos essa estratégia para manter os trechos pequenos o suficiente para um
 
 ---
 
-## Integração com Gemma 12B
+## Integração com LLM remota
 
-A LLM obrigatória utilizada é:
+A integração usa um cliente OpenAI-compatible apontando para a API LIA/UFMS. No deploy atual, o endpoint fornecido está configurado para Qwen:
 
 ```text
-Gemma 12B
+Qwen/Qwen2.5-14B-Instruct-AWQ
 ```
 
 Modelo configurado:
 
 ```env
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 ```
 
 URL da API:
 
 ```env
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
 ```
 
 A chave de API deve ser configurada em variável de ambiente ou secret:
@@ -306,6 +307,8 @@ GEMMA_API_KEY=sua_chave_aqui
 ```
 
 A chave nunca deve ser versionada no Git.
+
+> Observação: `GEMMA_BASE_URL`, `GEMMA_MODEL`, `GEMMA_API_KEY`, `GEMMA_TIMEOUT_SECONDS` e `GEMMA_MAX_TOKENS` são nomes legados do projeto. Eles continuam válidos para não quebrar o deploy, mas configuram a LLM remota OpenAI-compatible atual.
 
 ---
 
@@ -352,7 +355,7 @@ O projeto possui tratamento controlado para diferentes situações.
 | Problema de integração com LLM | Endpoint `/api/debug/gemma-ping`. |
 | Falta de evidência no RAG | Resposta informa ausência de contexto suficiente. |
 
-### Diagnóstico da Gemma
+### Diagnóstico da LLM
 
 Endpoint:
 
@@ -360,7 +363,7 @@ Endpoint:
 /api/debug/gemma-ping
 ```
 
-Esse endpoint testa a comunicação direta com a Gemma sem passar pelo fluxo completo do agente.
+Esse endpoint mantém o nome `gemma-ping` por compatibilidade, mas testa a comunicação direta com a LLM remota sem passar pelo fluxo completo do agente.
 
 Exemplo de retorno esperado:
 
@@ -368,10 +371,24 @@ Exemplo de retorno esperado:
 {
   "ok": true,
   "modo": "gemma",
+  "provider": "openai-compatible",
+  "llm_provider_label": "Qwen/Qwen2.5-14B-Instruct-AWQ",
   "resposta": "OK",
   "api_key_presente": true
 }
 ```
+
+---
+
+## Checklist do Trabalho 2
+
+A conferência da segunda parte da implementação está em:
+
+```text
+docs/CHECKLIST_TRABALHO_2.md
+```
+
+O checklist mapeia planejamento de estudos, melhorias de aprendizado, avaliação com 10 perguntas, análise de erros, dataset, tool calling, integração LLM e evidências técnicas para arquivos e endpoints do projeto.
 
 ---
 
@@ -423,8 +440,8 @@ Exemplo:
 
 ```env
 LLM_MODE=gemma
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 GEMMA_API_KEY=sua_chave_aqui
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
@@ -471,7 +488,7 @@ http://localhost:5173
 http://127.0.0.1:8000/api/status
 ```
 
-### Teste direto da Gemma
+### Teste direto da LLM
 
 ```text
 http://127.0.0.1:8000/api/debug/gemma-ping
@@ -534,8 +551,8 @@ Variables:
 
 ```env
 LLM_MODE=gemma
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
 RAG_MODE=hibrido
@@ -566,7 +583,7 @@ tokens pessoais
 chaves privadas
 ```
 
-A chave da Gemma deve ser usada apenas via:
+A chave da LLM deve ser usada apenas via:
 
 - `.env` local; ou
 - Secrets do Hugging Face.
@@ -583,8 +600,8 @@ A chave da Gemma deve ser usada apenas via:
 | Vite | Build do frontend. |
 | Docker | Empacotamento para deploy. |
 | Hugging Face Spaces | Hospedagem online. |
-| OpenAI SDK | Cliente compatível com a API Gemma. |
-| Gemma 12B | LLM obrigatória. |
+| OpenAI SDK | Cliente compatível com a API LLM remota. |
+| Qwen / LLM LIA-UFMS | Modelo remoto configurado no endpoint atual. |
 | BM25 | Recuperação lexical. |
 | FAISS | Busca vetorial. |
 | Sentence Transformers | Embeddings. |
@@ -619,7 +636,7 @@ jarvis-academico/
 
 - [x] Interface web em React.
 - [x] Backend em FastAPI.
-- [x] Integração com Gemma 12B.
+- [x] Integração com LLM remota OpenAI-compatible.
 - [x] RAG com fontes e scores.
 - [x] Tool calling.
 - [x] Upload de documentos.
@@ -638,7 +655,7 @@ jarvis-academico/
 - A qualidade das respostas depende dos documentos cadastrados.
 - Quando o tema não existe no dataset, o sistema usa fallback acadêmico.
 - Deploys gratuitos podem ter limitações de memória e tempo de resposta.
-- A chave da Gemma deve ser configurada corretamente para uso real.
+- A chave da LLM deve ser configurada corretamente para uso real.
 - O sistema não coleta dados automaticamente da internet.
 - O conjunto inicial de documentos é pequeno e serve como base demonstrativa.
 
@@ -652,7 +669,7 @@ As IAs utilizadas foram:
 
 - **ChatGPT**: Geração de código, apoio na estruturação do projeto, revisão de código, documentação, organização do README, análise de erros.
 - **Gemini**: apoio complementar na revisão de ideias, validação de explicações e comparação de alternativas técnicas.
-- **Gemma 12B via API LIA/UFMS**: modelo de linguagem integrado ao JARVIS Acadêmico para geração de respostas no sistema final.
+- **LLM remota via API LIA/UFMS**: modelo de linguagem integrado ao JARVIS Acadêmico para geração de respostas no sistema final. No endpoint atual, a configuração usa Qwen com variáveis `GEMMA_*` legadas.
 
 Observação: as IAs foram utilizadas como ferramentas de apoio. A implementação, validação, organização do repositório e decisões finais do projeto foram realizadas pelo grupo.
 

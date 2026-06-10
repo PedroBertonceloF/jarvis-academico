@@ -14,7 +14,7 @@
 - [x] Implementar fallback acadêmico transparente.
 - [x] Implementar revisão ativa.
 - [x] Implementar registro de dificuldades.
-- [x] Criar endpoints de diagnóstico da Gemma.
+- [x] Criar endpoints de diagnóstico da LLM remota.
 - [x] Criar testes básicos.
 - [x] Criar documentação técnica.
 - [x] Preencher avaliação com 10 perguntas.

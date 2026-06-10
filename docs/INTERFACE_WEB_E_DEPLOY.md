@@ -20,7 +20,7 @@ Principais endpoints:
 
 - `GET /` — abre a interface web compilada.
 - `GET /api/status` — mostra modo LLM, documentos, chunks e configuração do RAG.
-- `GET /api/debug/gemma-ping` — testa a Gemma diretamente, sem RAG e sem agente.
+- `GET /api/debug/gemma-ping` — testa a LLM remota diretamente, sem RAG e sem agente. O nome do endpoint é legado.
 - `GET /api/debug/config` — exibe configuração efetiva sem vazar segredos.
 - `POST /api/chat` — envia mensagem ao JARVIS.
 - `POST /api/upload` — importa documentos e reindexa a base.
@@ -91,8 +91,8 @@ Em **Variables**:
 
 ```env
 LLM_MODE=gemma
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
 RAG_MODE=hibrido
@@ -107,6 +107,8 @@ GEMMA_API_KEY=sua_chave_aqui
 ```
 
 A chave deve ser salva sem aspas e sem prefixo `GEMMA_API_KEY=`.
+
+`GEMMA_*` são nomes legados mantidos por compatibilidade. Eles configuram o cliente LLM remoto OpenAI-compatible atual.
 
 ---
 
@@ -137,7 +139,7 @@ http://localhost:5173
 
 ## Observações importantes
 
-- A chave da Gemma nunca deve ficar no frontend.
-- A chave da Gemma nunca deve ser commitada no GitHub.
+- A chave da LLM nunca deve ficar no frontend.
+- A chave da LLM nunca deve ser commitada no GitHub.
 - `data/uploads/*` deve ser ignorado no Git, mantendo apenas `data/uploads/.gitkeep` se necessário.
 - O deploy principal é Hugging Face Spaces; outros provedores não fazem parte do fluxo oficial da entrega.

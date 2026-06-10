@@ -1,3 +1,4 @@
+from src.rag import RagEngine
 from src.storage import Dificuldade, Revisao
 from src.tools import TOOL_SPECS, ToolRegistry
 
@@ -31,6 +32,6 @@ def test_tool_specs_incluem_revisao_e_dificuldades():
 
 
 def test_tool_registry_expoe_funcoes_novas_sem_executar_llm():
-    registry = ToolRegistry(rag=None)
+    registry = ToolRegistry(rag=RagEngine(carregar_agora=False))
     for nome in ["iniciar_revisao", "avaliar_resposta_revisao", "registrar_dificuldade", "listar_dificuldades", "adicionar_evento"]:
         assert nome in registry.funcoes

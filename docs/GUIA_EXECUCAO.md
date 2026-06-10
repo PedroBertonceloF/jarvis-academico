@@ -10,7 +10,7 @@ Este guia descreve o fluxo atual do projeto: **backend FastAPI + frontend React/
 - Node.js 20 ou superior.
 - npm.
 - git.
-- Internet para instalar dependências e acessar a API Gemma.
+- Internet para instalar dependências e acessar a API LLM remota.
 
 ---
 
@@ -67,8 +67,8 @@ Editar o arquivo `.env` e preencher a chave:
 
 ```env
 LLM_MODE=gemma
-GEMMA_BASE_URL=https://llm.liaufms.org/v1/gemma-3-12b-it
-GEMMA_MODEL=google/gemma-3-12b-it
+GEMMA_BASE_URL=https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq
+GEMMA_MODEL=Qwen/Qwen2.5-14B-Instruct-AWQ
 GEMMA_API_KEY=COLE_A_CHAVE_AQUI
 GEMMA_TIMEOUT_SECONDS=180
 GEMMA_MAX_TOKENS=512
@@ -78,6 +78,8 @@ PYTHONUNBUFFERED=1
 ```
 
 Nunca enviar `.env` para o GitHub.
+
+Observação: as variáveis `GEMMA_*` são nomes legados do projeto. Elas continuam sendo usadas pelo código e pelo Hugging Face, mas configuram o cliente LLM remoto OpenAI-compatible atual.
 
 ---
 

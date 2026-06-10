@@ -99,7 +99,11 @@ def _resumo_base() -> dict[str, Any]:
             "documentos": len(rag.docs),
             "chunks": len(rag.chunks),
             "arquivos": sorted({doc.get("fonte", "") for doc in rag.docs if doc.get("fonte")}),
-            "modo_recuperacao": os.getenv("RAG_MODE", "hibrido").strip().lower() or "hibrido",
+            "modo_recuperacao": getattr(
+                rag,
+                "modo_recuperacao_atual",
+                os.getenv("RAG_MODE", "hibrido").strip().lower() or "hibrido",
+            ),
         }
     except Exception as exc:
         return {
@@ -192,6 +196,9 @@ def health() -> dict[str, Any]:
     return {
         "ok": True,
         "modo_llm": settings.llm_mode,
+        "llm_mode": settings.llm_mode,
+        "llm_provider": settings.llm_provider,
+        "llm_provider_label": settings.llm_provider_label,
         "embedding_model": settings.embedding_model,
         "base": {"documentos": base["documentos"], "chunks": base["chunks"]},
     }
@@ -199,17 +206,28 @@ def health() -> dict[str, Any]:
 
 @app.get("/api/status")
 def status() -> dict[str, Any]:
+    base = _resumo_base()
     return {
         "modo_llm": settings.llm_mode,
+        "llm_mode": settings.llm_mode,
+        "llm_provider": settings.llm_provider,
+        "llm_provider_label": settings.llm_provider_label,
+        "llm_model": str(settings.gemma_model or "").strip(),
         "usando_mock": settings.usando_mock,
-        "base_rag": _resumo_base(),
+        "rag_mode": base.get("modo_recuperacao"),
+        "docs": base.get("documentos", 0),
+        "chunks": base.get("chunks", 0),
+        "base_rag": base,
         "uploads_dir": str(UPLOADS_DIR.relative_to(ROOT_DIR)),
     }
 
 
 @app.get("/api/debug/gemma-ping")
 def debug_gemma_ping(prompt: str = Query("Responda apenas: OK", min_length=1, max_length=200)) -> dict[str, Any]:
-    """Diagnóstico direto da Gemma: não usa RAG, agente nem tool calling."""
+    """Diagnóstico direto da LLM remota: não usa RAG, agente nem tool calling.
+
+    O caminho mantém "gemma" por compatibilidade com versões anteriores.
+    """
     inicio = time.perf_counter()
     try:
         resultado = GemmaClient().ping(prompt=prompt)
@@ -219,10 +237,16 @@ def debug_gemma_ping(prompt: str = Query("Responda apenas: OK", min_length=1, ma
         return {
             "ok": False,
             "tipo_erro": exc.__class__.__name__,
+            "error_type": exc.__class__.__name__,
             "mensagem": str(exc),
+            "error_message": str(exc),
             "elapsed_total_seconds": round(time.perf_counter() - inicio, 3),
             "modo_llm": settings.llm_mode,
+            "llm_mode": settings.llm_mode,
+            "provider": settings.llm_provider,
+            "llm_provider_label": settings.llm_provider_label,
             "base_url_configurada": bool(str(settings.gemma_base_url or "").strip()),
+            "base_url": str(settings.gemma_base_url or "").strip(),
             "model": str(settings.gemma_model or "").strip(),
             "api_key_presente": bool(str(settings.gemma_api_key or "").strip()),
             "timeout_seconds": os.getenv("GEMMA_TIMEOUT_SECONDS", "180"),
@@ -235,8 +259,12 @@ def debug_config() -> dict[str, Any]:
     """Mostra configuração efetiva sem expor segredos."""
     return {
         "modo_llm": settings.llm_mode,
+        "llm_mode": settings.llm_mode,
+        "llm_provider": settings.llm_provider,
+        "llm_provider_label": settings.llm_provider_label,
         "usando_mock": settings.usando_mock,
         "gemma_base_url_presente": bool(str(settings.gemma_base_url or "").strip()),
+        "gemma_base_url": str(settings.gemma_base_url or "").strip(),
         "gemma_model": str(settings.gemma_model or "").strip(),
         "gemma_api_key_presente": bool(str(settings.gemma_api_key or "").strip()),
         "gemma_timeout_seconds": os.getenv("GEMMA_TIMEOUT_SECONDS", "180"),

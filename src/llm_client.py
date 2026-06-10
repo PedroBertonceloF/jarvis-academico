@@ -30,10 +30,24 @@ def _env_int(nome: str, padrao: int) -> int:
         return padrao
 
 
+def _resumir_erro(exc: Exception, limite: int = 500) -> str:
+    partes = []
+    atual: BaseException | None = exc
+    while atual is not None and len(partes) < 4:
+        texto = str(atual).strip()
+        if texto:
+            partes.append(f"{atual.__class__.__name__}: {texto}")
+        atual = atual.__cause__
+    return compactar_texto(" | ".join(partes) or exc.__class__.__name__, limite=limite)
+
+
 class GemmaClient:
-    """Cliente OpenAI-compatible para o Gemma 12B exigido no trabalho.
+    """Cliente OpenAI-compatible para a LLM remota usada no trabalho.
 
     Também oferece diagnóstico de conectividade para deploy online.
+    O nome da classe e das variáveis GEMMA_* é mantido por compatibilidade
+    com o histórico do projeto e com o Space já configurado.
+
     Variáveis úteis:
     - GEMMA_TIMEOUT_SECONDS: tempo máximo de chamada à API.
     - GEMMA_MAX_TOKENS: limite superior de tokens por resposta.
@@ -45,6 +59,8 @@ class GemmaClient:
         self.mock = settings.usando_mock
         self.base_url = _limpar_env(settings.gemma_base_url)
         self.api_key = _limpar_env(settings.gemma_api_key)
+        self.provider = settings.llm_provider
+        self.provider_label = self.model or settings.llm_provider_label
         self.timeout_seconds = _env_int("GEMMA_TIMEOUT_SECONDS", 180)
         self.max_tokens_limit = _env_int("GEMMA_MAX_TOKENS", 512)
 
@@ -74,33 +90,40 @@ class GemmaClient:
             return response.choices[0].message.content or ""
         except APITimeoutError as exc:
             raise TimeoutError(
-                f"Timeout ao chamar Gemma após {self.timeout_seconds}s. "
-                "A API externa não respondeu dentro do limite configurado."
+                f"Timeout ao chamar a API LLM após {self.timeout_seconds}s. "
+                "A API externa não respondeu dentro do limite configurado. "
+                f"Detalhe técnico: {_resumir_erro(exc)}"
             ) from exc
         except AuthenticationError as exc:
             raise PermissionError(
-                "Token da Gemma inválido ou recusado pela API. "
-                "Confira o Secret GEMMA_API_KEY, sem aspas e sem 'GEMMA_API_KEY=' no valor."
+                "Token da API LLM inválido ou recusado. "
+                "Confira o Secret GEMMA_API_KEY, sem aspas e sem 'GEMMA_API_KEY=' no valor. "
+                f"Detalhe técnico: {_resumir_erro(exc)}"
             ) from exc
         except APIConnectionError as exc:
             raise ConnectionError(
-                "Falha de conexão com a API Gemma. "
-                "Confira se o ambiente online consegue acessar GEMMA_BASE_URL."
+                "Falha de conexão com a API LLM. "
+                "Confira se o ambiente online consegue acessar GEMMA_BASE_URL. "
+                f"Detalhe técnico: {_resumir_erro(exc)}"
             ) from exc
         except APIStatusError as exc:
             raise RuntimeError(
-                f"Erro HTTP da API Gemma: status={exc.status_code}, resposta={exc.response.text[:500]}"
+                f"Erro HTTP da API LLM: status={exc.status_code}, resposta={exc.response.text[:500]}. "
+                f"Detalhe técnico: {_resumir_erro(exc)}"
             ) from exc
 
     def ping(self, prompt: str = "Responda apenas: OK") -> dict[str, Any]:
-        """Teste direto da Gemma, sem RAG, sem tool calling e sem agente."""
+        """Teste direto da LLM remota, sem RAG, sem tool calling e sem agente."""
         inicio = time.perf_counter()
 
         if self.mock:
             return {
                 "ok": True,
                 "modo": "mock",
+                "provider": self.provider,
+                "llm_provider_label": self.provider_label,
                 "resposta": "OK MOCK",
+                "response_preview": "OK MOCK",
                 "elapsed_seconds": round(time.perf_counter() - inicio, 3),
                 "base_url": self.base_url,
                 "model": self.model,
@@ -116,8 +139,11 @@ class GemmaClient:
         )
         return {
             "ok": True,
-            "modo": "gemma",
+            "modo": settings.llm_mode,
+            "provider": self.provider,
+            "llm_provider_label": self.provider_label,
             "resposta": resposta,
+            "response_preview": compactar_texto(resposta, limite=160),
             "elapsed_seconds": round(time.perf_counter() - inicio, 3),
             "base_url": self.base_url,
             "model": self.model,
@@ -159,8 +185,8 @@ class GemmaClient:
             return self._responder_final_mock(ultimo)
 
         return (
-            "Modo teste sem Gemma ativo. Consigo validar o fluxo do sistema, mas a resposta final oficial "
-            "deve ser testada depois com o token do professor e LLM_MODE=gemma."
+            "Modo teste sem LLM remota ativo. Consigo validar o fluxo do sistema, mas a resposta final oficial "
+            "deve ser testada depois com o token do professor e LLM_MODE=gemma ou LLM_MODE=qwen."
         )
 
     def _extrair_mensagem_usuario(self, prompt: str) -> str:
@@ -247,7 +273,7 @@ class GemmaClient:
         if not resultados:
             return "Não precisei chamar ferramentas para responder em modo teste."
 
-        partes = ["Modo teste sem Gemma — ferramentas executadas com sucesso."]
+        partes = ["Modo teste sem LLM remota — ferramentas executadas com sucesso."]
         for item in resultados:
             tool = item.get("tool", "")
             saida = item.get("saida")
@@ -257,7 +283,7 @@ class GemmaClient:
                         "\nNão encontrei esse tema nos materiais cadastrados. "
                         "Vou responder com meu conhecimento geral da base de dados do modelo.\n\n"
                         "Em modo mock, o fallback geral foi acionado corretamente. "
-                        "Na validação com Gemma, aqui será gerada uma explicação didática sobre o conceito solicitado.\n\n"
+                        "Na validação com a LLM remota, aqui será gerada uma explicação didática sobre o conceito solicitado.\n\n"
                         "Sugestão: importe um PDF, anotação ou material sobre esse tema para que respostas futuras sejam baseadas no RAG."
                     )
                 else:
@@ -296,7 +322,7 @@ class GemmaClient:
             else:
                 partes.append(f"\n{tool}: {self._resumir_objeto(saida)}")
 
-        partes.append("\nNa entrega final, troque para LLM_MODE=gemma e valide a geração real com Gemma 12B.")
+        partes.append("\nNa entrega final, troque para LLM_MODE=gemma ou LLM_MODE=qwen e valide a geração real com a LLM remota.")
         return "\n".join(partes)
 
     def _resumir_objeto(self, obj: Any, limite: int = 1000) -> str:

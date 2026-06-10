@@ -96,13 +96,15 @@ Motivo:
 
 ---
 
-## 8. Endpoint de diagnóstico da Gemma
+## 8. Endpoint de diagnóstico da LLM
 
 Foi criado:
 
 ```text
 /api/debug/gemma-ping
 ```
+
+O nome do endpoint é mantido por compatibilidade com versões anteriores. O diagnóstico testa a LLM remota OpenAI-compatible configurada por `GEMMA_BASE_URL`, `GEMMA_MODEL` e `GEMMA_API_KEY`.
 
 Motivo:
 
