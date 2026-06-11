@@ -73,21 +73,20 @@ O projeto tem como objetivos principais:
 
 A identidade atual usa o símbolo aprovado **F01 / C01 — Convergência orbital**, criado para representar três trajetórias orbitais, múltiplas fontes, síntese, decisão e aprendizagem contínua.
 
-A interface é **dark-only** e segue a proporção visual:
+A interface possui **tema escuro como padrão** e **tema claro opcional persistido** em `localStorage` pela chave `jarvis-theme`.
 
 ```text
-80% editorial escuro + 20% energia violeta cósmica
+Charcoal Black no escuro + Porcelain Lavender no claro + marca orbital malva/lavanda
 ```
 
 Paleta principal:
 
-- fundo: `#050505`;
-- texto/paper: `#FBF5F0`;
-- marca lavanda: `#8A83DA`;
-- violeta profundo: `#463699`;
-- violeta elétrico ambiental: `#3A0CA3`.
+- escuro: Charcoal Black `#2B2B2B`, superfícies grafite-malva e texto lavanda claro;
+- claro: Porcelain Lavender `#F4F1F5`, superfícies branco-lavanda e texto Charcoal;
+- marca no escuro: Ash Lavender `#A49CA6`;
+- marca no claro: Deep Mauve `#5D536B`.
 
-O verde fica restrito a estados semânticos de sucesso, concluído ou online. A marca, o avatar do assistente, o item ativo, o RAG e os botões principais usam lavanda.
+O verde fica restrito a estados semânticos de sucesso, concluído ou online. A marca, o avatar do assistente, o item ativo, o RAG e os botões principais usam a cor de marca de cada tema. A área principal do chat apresenta o contexto como **Disciplina — Inteligência Artificial**, sem limitar o produto a uma prova específica.
 
 Assets de produção ficam em:
 

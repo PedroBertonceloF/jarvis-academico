@@ -1,14 +1,14 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">JARVIS Academico social preview</title>
   <desc id="desc">Social preview for JARVIS Academico using the official orbital convergence brand mark.</desc>
-  <rect width="1200" height="630" fill="#050505"/>
-  <path d="M80 110H1120M80 210H1120M80 310H1120M80 410H1120M80 510H1120M180 70V560M380 70V560M580 70V560M780 70V560M980 70V560" stroke="#262335" stroke-width="1"/>
-  <rect x="84" y="74" width="1032" height="482" rx="28" fill="#14121D" stroke="#2F2A42" stroke-width="2"/>
-  <circle cx="254" cy="315" r="136" fill="#1D1928" stroke="#8A83DA" stroke-width="3"/>
+  <rect width="1200" height="630" fill="#2B2B2B"/>
+  <path d="M80 110H1120M80 210H1120M80 310H1120M80 410H1120M80 510H1120M180 70V560M380 70V560M580 70V560M780 70V560M980 70V560" stroke="#48414E" stroke-width="1"/>
+  <rect x="84" y="74" width="1032" height="482" rx="28" fill="#353238" stroke="#5D536B" stroke-width="2"/>
+  <circle cx="254" cy="315" r="136" fill="#3E3942" stroke="#A49CA6" stroke-width="3"/>
   <image href="jarvis-symbol-paper.svg" x="154" y="215" width="200" height="200" preserveAspectRatio="xMidYMid meet"/>
-  <text x="450" y="280" fill="#FBF5F0" font-family="Inter, Arial, sans-serif" font-size="70" font-weight="800">JARVIS Academico</text>
-  <text x="454" y="342" fill="#C7C2CE" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="500">Assistente com RAG, LLM remota e tool calling</text>
-  <text x="454" y="409" fill="#8A83DA" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">Identidade orbital violeta - F01 / C01</text>
-  <rect x="454" y="446" width="126" height="8" rx="4" fill="#8A83DA"/>
-  <rect x="594" y="446" width="76" height="8" rx="4" fill="#FBF5F0" opacity="0.72"/>
+  <text x="450" y="280" fill="#F7F3F7" font-family="Inter, Arial, sans-serif" font-size="70" font-weight="800">JARVIS Academico</text>
+  <text x="454" y="342" fill="#D3CCD5" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="500">Assistente com RAG, LLM remota e tool calling</text>
+  <text x="454" y="409" fill="#A49CA6" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">Identidade orbital - F01 / C01</text>
+  <rect x="454" y="446" width="126" height="8" rx="4" fill="#A49CA6"/>
+  <rect x="594" y="446" width="76" height="8" rx="4" fill="#F7F3F7" opacity="0.72"/>
 </svg>

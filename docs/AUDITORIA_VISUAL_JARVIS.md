@@ -4,43 +4,49 @@
 
 O JARVIS já possuía uma estrutura funcional adequada para a entrega: navegação lateral, chat principal, upload de materiais, tarefas, agenda, fontes, logs e painel de evidências. A revisão visual anterior resolveu parte da hierarquia, mas ainda deixava a identidade apoiada na paleta antiga e em um símbolo desenhado dentro do `App.jsx`.
 
-Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_branding_complete(1).zip`.
+Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_branding_complete(1).zip` e evolui a paleta para temas claro/escuro acessíveis.
 
 ## Branding aprovado
 
 - Conceito: **F01 / C01 — Convergência orbital**.
 - Símbolo: três trajetórias orbitais, múltiplas fontes, síntese, decisão e aprendizagem contínua.
-- Direção cromática: **80% editorial escuro + 20% energia violeta cósmica**.
-- Aplicação: dark-only, sem alternador de tema e sem preferência automática para tema claro.
+- Direção cromática: Charcoal Black no escuro, Porcelain Lavender no claro, Deep Mauve/Ash Lavender como identidade.
+- Aplicação: tema escuro padrão, tema claro opcional e escolha persistida em `localStorage`.
 
 ## Ajustes aplicados
 
 | Área | Implementação |
 |---|---|
-| Marca | O SVG improvisado foi removido e substituído por assets oficiais em `frontend/public/brand/`. |
-| Sidebar | Símbolo lavanda, item ativo em `--brand-soft` e linha ativa em `--brand`. |
-| Header | Eyebrow e status remoto em lavanda; chunks permanecem neutros. |
-| Chat | Avatar oficial do assistente, mensagem do usuário em violeta profundo e resposta neutra. |
-| Composer | Foco e envio em lavanda, sem gradiente e sem neon. |
-| Inspector | Labels, fontes, métricas e logs com detalhes lavanda e texto técnico em mono. |
-| Materiais | Upload e ações principais em lavanda; sucesso/erro preservados como semântica. |
-| Tarefas | Ação principal lavanda, concluído em verde e erro/alerta nas cores semânticas. |
-| Agenda | Marcadores em lavanda, sem verde decorativo. |
-| Evidências | RAG e métricas em lavanda; fallback em dourado; erros em vermelho; sucesso em verde. |
+| Marca | O SVG oficial é usado como máscara CSS e muda de cor por tema via `--brand`. |
+| Sidebar | Item ativo em `--brand-soft`, linha ativa em `--brand` e contraste adequado nos dois temas. |
+| Header | Inclui alternador com `Sun`/`Moon`, `aria-label`, `aria-pressed` e persistência. |
+| Chat | Contexto fixo corrigido para Disciplina — Inteligência Artificial; mensagem do usuário adapta fundo e borda por tema. |
+| Composer | Foco e envio usam marca do tema atual, sem gradiente e sem neon. |
+| Inspector | Cards e superfícies usam tokens para leitura em claro e escuro. |
+| Materiais | Upload e ações principais usam marca; sucesso/erro preservados como semântica. |
+| Tarefas | Ação principal usa marca, concluir em verde e erro/alerta nas cores semânticas. |
+| Agenda | Marcadores usam marca do tema, sem verde decorativo. |
+| Evidências | RAG e métricas usam marca; fallback em dourado; erros em vermelho; sucesso em verde. |
 
 ## Paleta vigente
 
-- Fundo: `#050505`.
-- Superfícies: `#14121D`, `#1D1928`, `#262335`.
-- Texto principal: `#FBF5F0`.
-- Texto de apoio: `#C7C2CE`.
-- Texto secundário: `#8E8999`.
-- Marca principal: `#8A83DA`.
-- Marca profunda: `#463699`.
-- Energia ambiental: `#3A0CA3`.
-- Sucesso: `#80B89A`.
-- Aviso: `#D4A85F`.
-- Erro: `#D97972`.
+### Tema escuro
+
+- Fundo: `#2B2B2B`.
+- Superfícies: `#353238`, `#3E3942`, `#48414E`.
+- Texto principal: `#F7F3F7`.
+- Texto de apoio: `#D3CCD5`.
+- Texto secundário e marca: `#A49CA6`.
+- Profundidade: `#5D536B`.
+
+### Tema claro
+
+- Fundo: `#F4F1F5`.
+- Superfícies: `#FCFAFD`, `#E7E1E9`, `#DDD6E0`.
+- Texto principal: `#2B2B2B`.
+- Texto de apoio e marca: `#5D536B`.
+- Texto secundário: `#716978`.
+- Profundidade: `#A49CA6`.
 
 ## Referências antigas removidas
 
@@ -48,7 +54,8 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 - Verde deixou de ser usado como destaque genérico.
 - O símbolo inline antigo foi removido do React.
 - O fundo perdeu o padrão pontilhado que poderia parecer partículas.
-- O halo ambiental foi reduzido a uma única energia violeta controlada.
+- O fundo OLED quase absoluto foi substituído por Charcoal Black.
+- A área fixa do chat deixou de apresentar o sistema como preparação para uma prova específica.
 
 ## Riscos de regressão monitorados
 
@@ -57,6 +64,8 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 - Avatar e favicon precisam renderizar a partir dos assets oficiais.
 - Mobile não pode comprimir o chat por causa do inspector.
 - Estados de sucesso, alerta e erro continuam sem depender apenas de cor.
+- O tema claro não pode parecer clínico ou branco puro.
+- O alternador de tema precisa persistir após reload.
 
 ## Checklist de validação
 
@@ -67,5 +76,8 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 - [x] Favicons e PNGs gerados a partir dos SVGs violeta/creme.
 - [x] React usa componente dedicado de marca.
 - [x] Paleta anterior removida do frontend.
+- [x] Temas claro/escuro implementados com tokens.
+- [x] Tema escuro preservado como padrão.
+- [x] Escolha de tema persistida em `localStorage`.
+- [x] Contexto fixo corrigido para Disciplina — Inteligência Artificial.
 - [x] Design system documentado.
-- [x] Dark-only preservado.

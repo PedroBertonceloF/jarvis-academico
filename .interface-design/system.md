@@ -14,11 +14,11 @@ Estudos, fontes, RAG, revisão ativa, evidências, chunks, scores, tool calling,
 
 ## Color World
 
-- Fundo escuro técnico para foco prolongado.
-- Superfícies escuras levemente elevadas para separar áreas de trabalho.
-- Lavanda `#8A83DA` para identidade, RAG, foco ativo, avatar, links e botões principais.
-- Violeta profundo `#463699` para seleção e superfícies ativas.
-- Violeta elétrico `#3A0CA3` apenas para halo ambiental e profundidade discreta.
+- Charcoal Black `#2B2B2B` como base do tema escuro padrão.
+- Porcelain Lavender `#F4F1F5` como base do tema claro opcional.
+- Ash Lavender `#A49CA6` para identidade, RAG, foco ativo, avatar, links e botões principais no escuro.
+- Deep Mauve `#5D536B` para identidade, RAG, foco ativo, avatar, links e botões principais no claro.
+- Superfícies grafite-malva e branco-lavanda para separar áreas de trabalho sem branco puro.
 - Amarelo/dourado para alertas e atenção acadêmica.
 - Verde somente para sucesso, concluído ou online.
 
@@ -34,11 +34,11 @@ Símbolo orbital oficial e painel de evidências/fonte/RAG sempre próximos da c
 
 ## Tokens e padrões atuais
 
-- Tema: dark workspace.
+- Tema: dark por padrão, light opcional persistido em `localStorage` com a chave `jarvis-theme`.
 - Superfícies: `--surface`, `--surface-strong`, `--surface-soft`.
 - Bordas: `--border` e `--border-strong`.
 - Texto: `--text`, `--text-muted`, `--text-soft`.
-- Acentos: `--brand`, `--brand-deep`, `--brand-electric`, `--warning`, `--success`, `--danger`.
+- Acentos: `--brand`, `--brand-deep`, `--warning`, `--success`, `--danger`, `--info`.
 - Raios: `--radius-xl`, `--radius-lg`, `--radius-md`.
 - Profundidade: sombras amplas em contêineres principais e surface shifts em componentes internos.
 
@@ -51,7 +51,7 @@ Símbolo orbital oficial e painel de evidências/fonte/RAG sempre próximos da c
 
 ## Acessibilidade e responsividade
 
-- Manter contraste alto no tema escuro.
+- Manter contraste adequado no tema escuro e no tema claro.
 - Garantir foco visível em botões, inputs e navegação.
 - Evitar que painéis de evidência comprimam o chat no mobile.
 - Labels e títulos devem explicar ações técnicas sem depender só de cor.

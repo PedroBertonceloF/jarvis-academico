@@ -19,6 +19,7 @@ import {
   Loader2,
   Menu,
   MessageSquareText,
+  Moon,
   PanelRightClose,
   PanelRightOpen,
   Paperclip,
@@ -27,12 +28,40 @@ import {
   Send,
   ShieldCheck,
   Sparkles,
+  Sun,
   TerminalSquare,
   UploadCloud,
   Zap,
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
+const THEME_STORAGE_KEY = 'jarvis-theme';
+const THEME_COLORS = {
+  dark: '#2B2B2B',
+  light: '#F4F1F5',
+};
+
+function getInitialTheme() {
+  if (typeof window === 'undefined') return 'dark';
+  try {
+    const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return saved === 'light' ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+function applyTheme(theme) {
+  const resolvedTheme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = resolvedTheme;
+  document.documentElement.style.colorScheme = resolvedTheme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[resolvedTheme]);
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, resolvedTheme);
+  } catch {
+    // Persistência indisponível no ambiente atual.
+  }
+}
 
 const quickPrompts = [
   'O que é RAG?',
@@ -252,9 +281,10 @@ function MobileNav({ active, setActive }) {
   );
 }
 
-function StatusBar({ status, onRefresh }) {
+function StatusBar({ status, onRefresh, theme, onToggleTheme }) {
   const base = status?.base_rag || {};
   const llmStatusClass = status?.usando_mock ? 'mock' : 'remote';
+  const themeLabel = theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro';
   return (
     <header className="topbar">
       <div>
@@ -267,6 +297,15 @@ function StatusBar({ status, onRefresh }) {
           <Gauge size={14} /> {getLlmStatusLabel(status)}
         </span>
         <span className="status-pill"><Database size={14} /> {base.chunks ?? 0} chunks</span>
+        <button
+          className="icon-button theme-toggle"
+          onClick={onToggleTheme}
+          title={themeLabel}
+          aria-label={themeLabel}
+          aria-pressed={theme === 'light'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
         <button className="icon-button" onClick={onRefresh} title="Atualizar status">
           <RefreshCcw size={16} />
         </button>
@@ -347,9 +386,9 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
     <section className="chat-panel">
       <div className="session-card">
         <div>
-          <span className="mini-label">Sessão atual</span>
-          <h2>Prova de Inteligência Artificial</h2>
-          <p>Converse com o JARVIS, importe materiais e acompanhe fontes, ferramentas e tarefas em tempo real.</p>
+          <span className="mini-label">Disciplina</span>
+          <h2>Inteligência Artificial</h2>
+          <p>Consulte os materiais da disciplina, organize tarefas e acompanhe as fontes usadas em cada resposta.</p>
         </div>
         <div className="session-actions">
           <span><ShieldCheck size={15} /> Governança de fonte</span>
@@ -791,6 +830,7 @@ function ChatWorkspace({ active, ...props }) {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState(getInitialTheme);
   const [active, setActive] = useState('chat');
   const [collapsed, setCollapsed] = useState(false);
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
@@ -835,6 +875,14 @@ export default function App() {
   useEffect(() => {
     refreshAll();
   }, []);
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
+  }
 
   async function submitMessage(event) {
     event?.preventDefault();
@@ -903,7 +951,7 @@ export default function App() {
     <div className="app-shell">
       <Sidebar active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} />
       <main className="main-area">
-        <StatusBar status={status} onRefresh={refreshAll} />
+        <StatusBar status={status} onRefresh={refreshAll} theme={theme} onToggleTheme={toggleTheme} />
         <div className={`workspace-grid ${inspectorCollapsed ? 'inspector-collapsed' : ''}`}>
           <ChatWorkspace
             active={active}

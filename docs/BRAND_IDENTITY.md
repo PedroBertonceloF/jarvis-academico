@@ -42,13 +42,12 @@ jarvis_branding/04_master/svg/jarvis_symbol_micro.svg
 
 ## Direção visual
 
-A interface é **dark-only**.
+A interface possui dois temas:
 
-Proporção visual:
+- escuro padrão em **Charcoal Black**;
+- claro opcional em **Porcelain Lavender**.
 
-```text
-80% editorial escuro + 20% energia violeta cósmica
-```
+A escolha do usuário é persistida em `localStorage` pela chave `jarvis-theme`. No primeiro acesso, o tema escuro é usado.
 
 Características:
 
@@ -64,31 +63,40 @@ Características:
 
 ## Paleta
 
-| Papel | Cor |
-|---|---|
-| Fundo principal | `#050505` |
-| Fundo suave | `#0D0C12` |
-| Superfície | `#14121D` |
-| Superfície forte | `#1D1928` |
-| Superfície suave | `#262335` |
-| Texto principal / paper | `#FBF5F0` |
-| Texto de apoio | `#C7C2CE` |
-| Texto secundário | `#8E8999` |
-| Marca principal | `#8A83DA` |
-| Marca profunda | `#463699` |
-| Violeta elétrico ambiental | `#3A0CA3` |
-| Sucesso | `#80B89A` |
-| Aviso | `#D4A85F` |
-| Erro | `#D97972` |
+| Papel | Tema escuro | Tema claro |
+|---|---|---|
+| Fundo principal | `#2B2B2B` | `#F4F1F5` |
+| Fundo suave | `#302E32` | `#ECE7EE` |
+| Superfície | `#353238` | `#FCFAFD` |
+| Superfície forte | `#3E3942` | `#E7E1E9` |
+| Superfície suave | `#48414E` | `#DDD6E0` |
+| Texto principal | `#F7F3F7` | `#2B2B2B` |
+| Texto de apoio | `#D3CCD5` | `#5D536B` |
+| Texto secundário | `#A49CA6` | `#716978` |
+| Marca principal | `#A49CA6` | `#5D536B` |
+| Marca forte | `#C4B9C8` | `#4B4256` |
+| Profundidade | `#5D536B` | `#A49CA6` |
+| Sucesso | `#80B89A` | `#4F765F` |
+| Aviso | `#D4A85F` | `#8A6426` |
+| Erro | `#D97972` | `#A34F4A` |
 
 ## Regras de cor
 
-- Use `#8A83DA` para logo, avatar, foco, links, item ativo, RAG e ações principais.
-- Use `#463699` em seleção, chips ativos e mensagem do usuário.
-- Use `#3A0CA3` apenas em halo ambiental, profundidade discreta e social preview.
-- Use `#80B89A` somente para sucesso, concluído ou online.
+- Use Ash Lavender para logo, avatar, foco, links, item ativo, RAG e ações principais no tema escuro.
+- Use Deep Mauve para logo, avatar, foco, links, item ativo, RAG e ações principais no tema claro.
+- Use Porcelain Lavender como fundo claro principal, nunca branco puro.
+- Use `#80B89A` / `#4F765F` somente para sucesso, concluído ou online.
 - Não use verde para marca, RAG, links, botões primários ou navegação ativa.
-- Não use violeta profundo como texto pequeno sobre fundo preto.
+- Não use Deep Mauve como texto pequeno no tema escuro.
+- Não use Ash Lavender como texto pequeno sobre Porcelain sem contraste suficiente.
+
+## Tema e marca
+
+O componente `BrandMark` não troca imagens por tema. Ele usa o SVG oficial `jarvis-symbol.svg` como máscara CSS e preenche o símbolo com `--brand`.
+
+- Escuro: símbolo em Ash Lavender.
+- Claro: símbolo em Deep Mauve.
+- Favicons e app icons continuam usando os assets estáticos gerados a partir do pacote de branding.
 
 ## Assets de produção
 
@@ -116,9 +124,9 @@ frontend/public/brand/social-preview.svg
 
 | Uso | Asset |
 |---|---|
-| Sidebar expandida | `jarvis-symbol-lavender.svg`, 38 px ou mais |
-| Sidebar recolhida | `jarvis-symbol-lavender.svg`, 38 px |
-| Avatar do assistente | `jarvis-symbol-lavender.svg`, 30 a 40 px |
+| Sidebar expandida | `BrandMark` com máscara CSS, 38 px ou mais |
+| Sidebar recolhida | `BrandMark` com máscara CSS, 38 px |
+| Avatar do assistente | `BrandMark` com máscara CSS, 30 a 40 px |
 | Favicon | `jarvis-symbol-micro.svg` ou `favicon-*` |
 | App icon | `jarvis-app-icon-192.png` e `jarvis-app-icon-512.png` |
 | Social preview | `social-preview.svg` |
@@ -130,6 +138,7 @@ frontend/public/brand/social-preview.svg
 - Não usar símbolo preto sobre fundo escuro.
 - Não usar PNG antigo do aplicativo.
 - Não adicionar o ZIP completo ao repositório.
-- Não criar tema claro, alternador de tema ou CSS de tema claro.
+- Não voltar ao tema escuro exclusivo.
+- Não usar branco puro como fundo principal do tema claro.
 - Não usar glow pulsante, partículas, estrelas ou aurora pesada.
 - Não usar a marca como decoração repetida.
