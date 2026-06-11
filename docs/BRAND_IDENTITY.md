@@ -109,7 +109,7 @@ frontend/public/brand/favicon.ico
 frontend/public/brand/favicon-16.png
 frontend/public/brand/favicon-32.png
 frontend/public/brand/favicon-48.png
-frontend/public/brand/social-preview-1200x630.png
+frontend/public/brand/social-preview.svg
 ```
 
 ## Tamanhos recomendados
@@ -121,7 +121,7 @@ frontend/public/brand/social-preview-1200x630.png
 | Avatar do assistente | `jarvis-symbol-lavender.svg`, 30 a 40 px |
 | Favicon | `jarvis-symbol-micro.svg` ou `favicon-*` |
 | App icon | `jarvis-app-icon-192.png` e `jarvis-app-icon-512.png` |
-| Social preview | `social-preview-1200x630.png` |
+| Social preview | `social-preview.svg` |
 
 ## Usos proibidos
 
