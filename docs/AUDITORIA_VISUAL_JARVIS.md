@@ -10,7 +10,7 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 
 - Conceito: **F01 / C01 — Convergência orbital**.
 - Símbolo: três trajetórias orbitais, múltiplas fontes, síntese, decisão e aprendizagem contínua.
-- Direção cromática: Charcoal Black no escuro, Porcelain Lavender no claro, Deep Mauve/Ash Lavender como identidade.
+- Direção cromática: Charcoal Black no escuro, Porcelain Lavender no claro, violeta `#8A83DA` no escuro e Deep Mauve no claro como identidade.
 - Aplicação: tema escuro padrão, tema claro opcional e escolha persistida em `localStorage`.
 
 ## Ajustes aplicados
@@ -19,14 +19,14 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 |---|---|
 | Marca | O SVG oficial é usado como máscara CSS e muda de cor por tema via `--brand`. |
 | Sidebar | Item ativo em `--brand-soft`, linha ativa em `--brand` e contraste adequado nos dois temas. |
-| Header | Inclui alternador com `Sun`/`Moon`, `aria-label`, `aria-pressed` e persistência. |
+| Header | Status da LLM, label “Espaço de estudo” e alternador de tema usam presença violeta controlada. |
 | Chat | Contexto fixo corrigido para Disciplina — Inteligência Artificial; mensagem do usuário adapta fundo e borda por tema. |
 | Composer | Foco e envio usam marca do tema atual, sem gradiente e sem neon. |
 | Inspector | Cards e superfícies usam tokens para leitura em claro e escuro. |
 | Materiais | Upload e ações principais usam marca; sucesso/erro preservados como semântica. |
 | Tarefas | Ação principal usa marca, concluir em verde e erro/alerta nas cores semânticas. |
 | Agenda | Marcadores usam marca do tema, sem verde decorativo. |
-| Evidências | RAG e métricas usam marca; fallback em dourado; erros em vermelho; sucesso em verde. |
+| Evidências | RAG e recuperação usam marca; fallback em dourado; erros em vermelho; sucesso real em verde. |
 
 ## Paleta vigente
 
@@ -36,7 +36,9 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 - Superfícies: `#353238`, `#3E3942`, `#48414E`.
 - Texto principal: `#F7F3F7`.
 - Texto de apoio: `#D3CCD5`.
-- Texto secundário e marca: `#A49CA6`.
+- Texto secundário: `#A49CA6`.
+- Marca principal: `#8A83DA`.
+- Marca forte: `#B4AAEB`.
 - Profundidade: `#5D536B`.
 
 ### Tema claro
@@ -47,6 +49,7 @@ Essa versão sincroniza o produto com o branding aprovado no pacote `jarvis_bran
 - Texto de apoio e marca: `#5D536B`.
 - Texto secundário: `#716978`.
 - Profundidade: `#A49CA6`.
+- Violeta secundário: `#7567B3`.
 
 ## Referências antigas removidas
 

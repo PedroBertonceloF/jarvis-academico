@@ -1,11 +1,10 @@
 export default function BrandMark({
-  variant = 'default',
   size = 38,
   title = 'JARVIS Acadêmico',
   decorative = true,
   className = '',
 }) {
-  const classes = ['brand-mark', `brand-mark-${variant}`, className].filter(Boolean).join(' ');
+  const classes = ['brand-mark', className].filter(Boolean).join(' ');
 
   return (
     <span

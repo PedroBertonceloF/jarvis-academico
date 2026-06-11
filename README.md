@@ -76,17 +76,17 @@ A identidade atual usa o símbolo aprovado **F01 / C01 — Convergência orbital
 A interface possui **tema escuro como padrão** e **tema claro opcional persistido** em `localStorage` pela chave `jarvis-theme`.
 
 ```text
-Charcoal Black no escuro + Porcelain Lavender no claro + marca orbital malva/lavanda
+65% Charcoal/grafite + 20% texto/Ash Lavender + 10% violeta de marca + 5% estados semânticos
 ```
 
 Paleta principal:
 
 - escuro: Charcoal Black `#2B2B2B`, superfícies grafite-malva e texto lavanda claro;
 - claro: Porcelain Lavender `#F4F1F5`, superfícies branco-lavanda e texto Charcoal;
-- marca no escuro: Ash Lavender `#A49CA6`;
+- marca no escuro: violeta `#8A83DA`;
 - marca no claro: Deep Mauve `#5D536B`.
 
-O verde fica restrito a estados semânticos de sucesso, concluído ou online. A marca, o avatar do assistente, o item ativo, o RAG e os botões principais usam a cor de marca de cada tema. A área principal do chat apresenta o contexto como **Disciplina — Inteligência Artificial**, sem limitar o produto a uma prova específica.
+Ash Lavender `#A49CA6` fica como apoio para metadados e texto secundário no tema escuro, não como identidade principal. O verde fica restrito a estados semânticos de sucesso, concluído ou online. A marca, o avatar do assistente, o item ativo, o RAG e os botões principais usam a cor de marca de cada tema. A área principal do chat apresenta o contexto como **Disciplina — Inteligência Artificial**, sem limitar o produto a uma prova específica.
 
 Assets de produção ficam em:
 

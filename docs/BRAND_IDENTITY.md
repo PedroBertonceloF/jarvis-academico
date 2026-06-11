@@ -73,8 +73,9 @@ Características:
 | Texto principal | `#F7F3F7` | `#2B2B2B` |
 | Texto de apoio | `#D3CCD5` | `#5D536B` |
 | Texto secundário | `#A49CA6` | `#716978` |
-| Marca principal | `#A49CA6` | `#5D536B` |
-| Marca forte | `#C4B9C8` | `#4B4256` |
+| Marca principal | `#8A83DA` | `#5D536B` |
+| Marca forte | `#B4AAEB` | `#463699` |
+| Violeta secundário | `#7567B3` | `#7567B3` |
 | Profundidade | `#5D536B` | `#A49CA6` |
 | Sucesso | `#80B89A` | `#4F765F` |
 | Aviso | `#D4A85F` | `#8A6426` |
@@ -82,19 +83,21 @@ Características:
 
 ## Regras de cor
 
-- Use Ash Lavender para logo, avatar, foco, links, item ativo, RAG e ações principais no tema escuro.
+- Use `#8A83DA` para logo, avatar, foco, links, item ativo, RAG e ações principais no tema escuro.
 - Use Deep Mauve para logo, avatar, foco, links, item ativo, RAG e ações principais no tema claro.
+- Use Ash Lavender `#A49CA6` como apoio, metadado e profundidade discreta, não como marca principal.
 - Use Porcelain Lavender como fundo claro principal, nunca branco puro.
 - Use `#80B89A` / `#4F765F` somente para sucesso, concluído ou online.
 - Não use verde para marca, RAG, links, botões primários ou navegação ativa.
 - Não use Deep Mauve como texto pequeno no tema escuro.
 - Não use Ash Lavender como texto pequeno sobre Porcelain sem contraste suficiente.
+- Não aplicar violeta em todas as superfícies; a identidade deve aparecer em pontos estratégicos.
 
 ## Tema e marca
 
 O componente `BrandMark` não troca imagens por tema. Ele usa o SVG oficial `jarvis-symbol.svg` como máscara CSS e preenche o símbolo com `--brand`.
 
-- Escuro: símbolo em Ash Lavender.
+- Escuro: símbolo em violeta `#8A83DA`.
 - Claro: símbolo em Deep Mauve.
 - Favicons e app icons continuam usando os assets estáticos gerados a partir do pacote de branding.
 

@@ -12,12 +12,16 @@
   --text: #f7f3f7;
   --text-soft: #d3ccd5;
   --text-muted: #a49ca6;
-  --brand: #a49ca6;
-  --brand-strong: #c4b9c8;
+  --brand: #8a83da;
+  --brand-strong: #b4aaeb;
   --brand-deep: #5d536b;
-  --brand-soft: rgba(164, 156, 166, 0.12);
-  --brand-medium: rgba(164, 156, 166, 0.2);
-  --brand-border: rgba(164, 156, 166, 0.42);
+  --brand-electric: #7567b3;
+  --brand-soft: rgba(138, 131, 218, 0.13);
+  --brand-medium: rgba(138, 131, 218, 0.22);
+  --brand-border: rgba(138, 131, 218, 0.44);
+  --brand-glow: rgba(93, 83, 107, 0.28);
+  --lavender-muted: #a49ca6;
+  --lavender-soft: rgba(164, 156, 166, 0.12);
   --line: rgba(247, 243, 247, 0.09);
   --line-strong: rgba(247, 243, 247, 0.18);
   --info: #8da2c4;
@@ -44,14 +48,13 @@
   --input-bg: rgba(0, 0, 0, 0.14);
   --code-bg: rgba(0, 0, 0, 0.18);
   --code-block-bg: #242126;
-  --user-message-bg: rgba(93, 83, 107, 0.68);
-  --user-message-border: rgba(164, 156, 166, 0.46);
+  --user-message-bg: rgba(93, 83, 107, 0.72);
+  --user-message-border: rgba(138, 131, 218, 0.46);
   --on-brand: #2b2b2b;
-  --focus-ring: rgba(164, 156, 166, 0.34);
+  --focus-ring: rgba(138, 131, 218, 0.32);
   --selection-bg: var(--brand);
   --selection-text: #2b2b2b;
   --warning-text: #f0d6a7;
-  --brand-glow: rgba(93, 83, 107, 0.22);
   --font-display: "Space Grotesk", "Sora", sans-serif;
   --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -83,11 +86,15 @@
   --text-soft: #5d536b;
   --text-muted: #716978;
   --brand: #5d536b;
-  --brand-strong: #4b4256;
+  --brand-strong: #463699;
   --brand-deep: #3f3848;
+  --brand-electric: #7567b3;
   --brand-soft: rgba(93, 83, 107, 0.1);
-  --brand-medium: rgba(93, 83, 107, 0.18);
-  --brand-border: rgba(93, 83, 107, 0.34);
+  --brand-medium: rgba(117, 103, 179, 0.16);
+  --brand-border: rgba(93, 83, 107, 0.36);
+  --brand-glow: rgba(164, 156, 166, 0.2);
+  --lavender-muted: #a49ca6;
+  --lavender-soft: rgba(164, 156, 166, 0.14);
   --line: rgba(43, 43, 43, 0.1);
   --line-strong: rgba(43, 43, 43, 0.18);
   --success: #4f765f;
@@ -114,14 +121,13 @@
   --input-bg: rgba(252, 250, 253, 0.78);
   --code-bg: rgba(93, 83, 107, 0.08);
   --code-block-bg: #ede8f0;
-  --user-message-bg: var(--brand-soft);
-  --user-message-border: rgba(93, 83, 107, 0.36);
+  --user-message-bg: rgba(93, 83, 107, 0.1);
+  --user-message-border: rgba(93, 83, 107, 0.34);
   --on-brand: #f7f3f7;
   --focus-ring: rgba(93, 83, 107, 0.25);
   --selection-bg: var(--brand);
   --selection-text: #f7f3f7;
   --warning-text: #6d4c19;
-  --brand-glow: rgba(164, 156, 166, 0.2);
   --shadow-soft: 0 14px 38px rgba(61, 54, 70, 0.08);
   --shadow-float: 0 22px 55px rgba(61, 54, 70, 0.14);
 }
@@ -452,6 +458,10 @@ textarea:-webkit-autofill {
   background: var(--brand-soft);
 }
 
+.nav-item.active svg {
+  color: var(--brand);
+}
+
 .nav-item span {
   font-weight: 700;
 }
@@ -712,6 +722,12 @@ textarea:-webkit-autofill {
   border-color: var(--success-border);
   background: var(--success-soft);
   color: var(--success);
+}
+
+.mode-badge.rag {
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .mode-badge.warning {
@@ -1039,6 +1055,10 @@ textarea:-webkit-autofill {
   line-height: 1;
 }
 
+.glow-card .metric-grid strong {
+  color: var(--brand);
+}
+
 .metric-grid span,
 .source-card span,
 .muted,
@@ -1258,6 +1278,19 @@ textarea:-webkit-autofill {
 
 .evidence-pill.success svg {
   color: var(--success);
+}
+
+.evidence-pill.rag {
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+}
+
+.evidence-pill.rag svg {
+  color: var(--brand);
+}
+
+.evidence-pill.rag strong {
+  color: var(--brand);
 }
 
 .evidence-pill.info {

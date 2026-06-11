@@ -133,7 +133,7 @@ function inferMode(toolCalls = []) {
   const hasEmpty = toolCalls.some((call) => call?.saida?.resultado_vazio);
   const hasRag = toolCalls.some((call) => call?.tool === 'buscar_material_rag');
   if (hasEmpty) return { label: 'Fallback acadêmico', tone: 'warning' };
-  if (hasRag) return { label: 'RAG fundamentado', tone: 'success' };
+  if (hasRag) return { label: 'RAG fundamentado', tone: 'rag' };
   return { label: 'Tool calling', tone: 'info' };
 }
 
@@ -212,7 +212,7 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }) {
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top">
         <div className="brand">
-          <BrandMark variant="lavender" size={38} />
+          <BrandMark size={38} />
           {!collapsed && (
             <div>
               <strong>JARVIS</strong>
@@ -320,7 +320,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`message ${isUser ? 'user' : 'assistant'}`}>
       <div className="message-avatar">
-        {isUser ? <GraduationCap size={18} /> : <BrandMark variant="lavender" size={30} />}
+        {isUser ? <GraduationCap size={18} /> : <BrandMark size={30} />}
       </div>
       <div className="message-body">
         <div className="message-meta">
@@ -410,7 +410,7 @@ function ChatPanel({ messages, input, setInput, onSubmit, isLoading, onQuickProm
         ))}
         {isLoading && (
           <article className="message assistant loading">
-            <div className="message-avatar"><BrandMark variant="lavender" size={30} /></div>
+            <div className="message-avatar"><BrandMark size={30} /></div>
             <div className="message-body">
               <div className="message-meta"><strong>JARVIS</strong><span>pensando...</span></div>
               <div className="typing"><span /><span /><span /></div>
@@ -711,7 +711,7 @@ function EvidenceCard({ log, index }) {
           <span className="mini-label">Chamada #{index + 1}</span>
           <h3>{humanToolName(log.ferramenta)}</h3>
         </div>
-        <span className={`mode-badge ${diagnostics.isFallback ? 'warning' : diagnostics.isRag ? 'success' : 'info'}`}>
+        <span className={`mode-badge ${diagnostics.isFallback ? 'warning' : diagnostics.isRag ? 'rag' : 'info'}`}>
           {diagnostics.isFallback ? 'fallback tratado' : diagnostics.isRag ? 'RAG executado' : 'ferramenta executada'}
         </span>
       </div>
@@ -789,7 +789,7 @@ function LogsView({ logs }) {
       </div>
 
       <div className="rubric-grid">
-        <EvidencePill icon={Search} label="chamadas RAG" value={metrics.ragCalls} tone="success" />
+        <EvidencePill icon={Search} label="chamadas RAG" value={metrics.ragCalls} tone="rag" />
         <EvidencePill icon={TerminalSquare} label="tipos de ferramenta" value={metrics.toolTypes} tone="info" />
         <EvidencePill icon={FileText} label="fontes recuperadas" value={metrics.recoveredDocs} tone="neutral" />
         <EvidencePill icon={ShieldCheck} label="fallbacks tratados" value={metrics.fallbackCalls} tone="warning" />

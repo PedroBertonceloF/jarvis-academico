@@ -23,12 +23,14 @@ Sensação desejada: acadêmico, técnico, autoral, silencioso, premium, cósmic
 - Tema escuro padrão: Charcoal Black `#2B2B2B`, com superfícies grafite-malva `#353238`, `#3E3942` e `#48414E`.
 - Tema claro opcional: Porcelain Lavender `#F4F1F5`, com superfícies `#FCFAFD`, `#E7E1E9` e `#DDD6E0`.
 - Texto: lavanda quase branco `#F7F3F7` no escuro e Charcoal `#2B2B2B` no claro.
-- Marca no escuro: Ash Lavender `#A49CA6`.
+- Marca no escuro: violeta `#8A83DA`, usado em pontos estratégicos da identidade.
 - Marca no claro: Deep Mauve `#5D536B`.
+- Apoio: Ash Lavender `#A49CA6` para metadados e texto secundário no escuro, não como marca principal.
 - Profundidade: Deep Mauve no escuro e Ash Lavender no claro, sempre com contraste suave.
 - Semânticas: dourado para aviso, verde somente para sucesso/concluído/online, vermelho seco para erro.
 
 O verde não é identidade visual. RAG, foco, links, avatar, item ativo e botão primário usam a marca do tema atual.
+O violeta deve aparecer em aproximadamente 10% da interface visível, concentrado em logo, navegação ativa, labels, RAG, foco, status da LLM e ações principais, sem dominar cards e superfícies grandes.
 
 ### Temas
 
@@ -76,7 +78,7 @@ O símbolo aprovado é **F01 / C01 — Convergência orbital**. Ele representa t
 Uso:
 
 - O componente `BrandMark` usa máscara CSS baseada em `frontend/public/brand/jarvis-symbol.svg`.
-- No tema escuro, a marca herda Ash Lavender via `--brand`.
+- No tema escuro, a marca herda o violeta `#8A83DA` via `--brand`.
 - No tema claro, a marca herda Deep Mauve via `--brand`.
 - `frontend/public/brand/jarvis-symbol-micro.svg` continua disponível para favicon e tamanhos pequenos.
 - Não redesenhar o símbolo manualmente no React.

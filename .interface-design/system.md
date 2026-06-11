@@ -16,8 +16,9 @@ Estudos, fontes, RAG, revisão ativa, evidências, chunks, scores, tool calling,
 
 - Charcoal Black `#2B2B2B` como base do tema escuro padrão.
 - Porcelain Lavender `#F4F1F5` como base do tema claro opcional.
-- Ash Lavender `#A49CA6` para identidade, RAG, foco ativo, avatar, links e botões principais no escuro.
+- Violeta `#8A83DA` para identidade, RAG, foco ativo, avatar, links e botões principais no escuro.
 - Deep Mauve `#5D536B` para identidade, RAG, foco ativo, avatar, links e botões principais no claro.
+- Ash Lavender `#A49CA6` para metadados, texto secundário e apoio no escuro, não como marca principal.
 - Superfícies grafite-malva e branco-lavanda para separar áreas de trabalho sem branco puro.
 - Amarelo/dourado para alertas e atenção acadêmica.
 - Verde somente para sucesso, concluído ou online.
@@ -39,6 +40,7 @@ Símbolo orbital oficial e painel de evidências/fonte/RAG sempre próximos da c
 - Bordas: `--border` e `--border-strong`.
 - Texto: `--text`, `--text-muted`, `--text-soft`.
 - Acentos: `--brand`, `--brand-deep`, `--warning`, `--success`, `--danger`, `--info`.
+- Presença cromática: cerca de 10% de violeta visível, concentrado em logo, item ativo, labels, RAG, foco e ações principais.
 - Raios: `--radius-xl`, `--radius-lg`, `--radius-md`.
 - Profundidade: sombras amplas em contêineres principais e surface shifts em componentes internos.
 
