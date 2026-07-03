@@ -55,3 +55,22 @@ Para documentos maiores, como PDFs, apostilas ou anotações completas, pode ser
 O JARVIS Acadêmico não coleta dados automaticamente da internet. A base de conhecimento é formada por documentos locais cadastrados no projeto e por materiais adicionados manualmente pelo usuário.
 
 Essa escolha permite maior controle sobre a origem dos dados, facilita a análise das respostas geradas e torna o funcionamento do RAG mais transparente.
+
+## Política de ingestão: contexto vs. conexões
+
+Regra de decisão sobre o que pode entrar no índice de recuperação (`/data`):
+
+- **Contexto (indexar)** — apenas material acadêmico *perene*: conceitos, teoria,
+  apostilas, definições que continuarão úteis daqui a um ano. É isso que pertence a
+  `/data` e é chunkado/vetorizado.
+- **Conexões (NÃO indexar)** — dados voláteis e mutáveis: tarefas, agenda,
+  dificuldades e revisões. Já vivem em `/storage` como JSON e devem ser consultados
+  ao vivo pelas ferramentas do agente, nunca vetorizados. Vetorizar dado volátil
+  gera ruído e exige limpeza recorrente.
+- **Teste do perene:** antes de colocar um arquivo em `/data`, pergunte *"isto ainda
+  vai importar daqui a um ano?"*. Se não, mantenha fora do índice.
+- **Dados pessoais de terceiros (LGPD):** trabalhos, provas ou documentos de outras
+  pessoas enviados via `/data/uploads` podem conter dados pessoais. Não os trate como
+  material perene da base e não os exponha em respostas sem necessidade. Ao processar
+  via LLM remota (LIA/UFMS), lembre que o conteúdo sai da máquina — anonimize quando
+  o dado for de terceiros. Ver `../../SECOND-BRAIN.md` (gate de governança, tier T2).
