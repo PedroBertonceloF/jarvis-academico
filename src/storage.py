@@ -4,6 +4,8 @@ from dataclasses import dataclass, asdict
 from datetime import date, datetime
 from pathlib import Path
 import json
+import os
+import time
 import uuid
 
 from .config import settings
@@ -13,18 +15,72 @@ TAREFAS_PATH = settings.storage_dir / "tarefas.json"
 DIFICULDADES_PATH = settings.storage_dir / "dificuldades.json"
 REVISOES_PATH = settings.storage_dir / "revisoes.json"
 
+PRIORIDADES_VALIDAS = {"baixa", "média", "alta"}
 
-def _read_json(path: Path, default):
-    if not path.exists():
-        return default
+_LOCK_RETRY_ATTEMPTS = 20
+_LOCK_RETRY_INTERVAL_SECONDS = 0.05
+
+
+class JsonCollectionStore:
+    """Leitura/escrita de uma lista JSON em disco, com escrita atômica."""
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    def ler(self) -> list[dict]:
+        if not self.path.exists():
+            return []
+        try:
+            return json.loads(self.path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return []
+
+    def escrever(self, itens: list[dict]) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self.path.with_name(self.path.name + ".lock")
+        self._adquirir_lock(lock_path)
+        try:
+            tmp_path = self.path.with_name(f"{self.path.name}.{uuid.uuid4().hex}.tmp")
+            tmp_path.write_text(json.dumps(itens, ensure_ascii=False, indent=2), encoding="utf-8")
+            os.replace(tmp_path, self.path)
+        finally:
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+
+    @staticmethod
+    def _adquirir_lock(lock_path: Path) -> None:
+        for _ in range(_LOCK_RETRY_ATTEMPTS):
+            try:
+                fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.close(fd)
+                return
+            except FileExistsError:
+                time.sleep(_LOCK_RETRY_INTERVAL_SECONDS)
+        # Lock parado de uma execução anterior: assume e segue em frente.
+        try:
+            lock_path.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _validar_data(valor: str, campo: str) -> None:
+    if not valor:
+        return
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return default
+        datetime.strptime(valor, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ValueError(
+            f"Campo '{campo}' deve estar no formato AAAA-MM-DD ou vazio, recebido: {valor!r}"
+        ) from exc
 
 
-def _write_json(path: Path, data) -> None:
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+def _validar_prioridade(valor: str) -> None:
+    if valor not in PRIORIDADES_VALIDAS:
+        raise ValueError(
+            f"Campo 'prioridade' deve ser um de {sorted(PRIORIDADES_VALIDAS)}, recebido: {valor!r}"
+        )
 
 
 @dataclass
@@ -52,13 +108,17 @@ class Tarefa:
 
 
 class AgendaStore:
+    def __init__(self):
+        self._store = JsonCollectionStore(AGENDA_PATH)
+
     def listar(self) -> list[dict]:
-        return _read_json(AGENDA_PATH, [])
+        return self._store.ler()
 
     def salvar_eventos(self, eventos: list[dict]) -> None:
-        _write_json(AGENDA_PATH, eventos)
+        self._store.escrever(eventos)
 
     def adicionar(self, evento: EventoAgenda) -> dict:
+        _validar_data(evento.data, "data")
         eventos = self.listar()
         item = asdict(evento)
         eventos.append(item)
@@ -82,16 +142,21 @@ class AgendaStore:
 
 
 class TarefaStore:
+    def __init__(self):
+        self._store = JsonCollectionStore(TAREFAS_PATH)
+
     def listar(self, incluir_concluidas: bool = True) -> list[dict]:
-        tarefas = _read_json(TAREFAS_PATH, [])
+        tarefas = self._store.ler()
         if not incluir_concluidas:
             tarefas = [t for t in tarefas if not t.get("concluida", False)]
         return tarefas
 
     def salvar_tarefas(self, tarefas: list[dict]) -> None:
-        _write_json(TAREFAS_PATH, tarefas)
+        self._store.escrever(tarefas)
 
     def adicionar(self, tarefa: Tarefa) -> dict:
+        _validar_data(tarefa.prazo, "prazo")
+        _validar_prioridade(tarefa.prioridade)
         tarefas = self.listar()
         item = asdict(tarefa)
         tarefas.append(item)
@@ -147,8 +212,11 @@ class Revisao:
 
 
 class DificuldadeStore:
+    def __init__(self):
+        self._store = JsonCollectionStore(DIFICULDADES_PATH)
+
     def listar(self, disciplina: str | None = None, limite: int | None = None) -> list[dict]:
-        itens = _read_json(DIFICULDADES_PATH, [])
+        itens = self._store.ler()
         if disciplina:
             alvo = disciplina.strip().lower()
             itens = [d for d in itens if d.get("disciplina", "").strip().lower() == alvo]
@@ -158,7 +226,7 @@ class DificuldadeStore:
         return itens
 
     def salvar(self, itens: list[dict]) -> None:
-        _write_json(DIFICULDADES_PATH, itens)
+        self._store.escrever(itens)
 
     def adicionar(self, dificuldade: Dificuldade) -> dict:
         itens = self.listar()
@@ -169,15 +237,18 @@ class DificuldadeStore:
 
 
 class RevisaoStore:
+    def __init__(self):
+        self._store = JsonCollectionStore(REVISOES_PATH)
+
     def listar(self, incluir_avaliadas: bool = True) -> list[dict]:
-        itens = _read_json(REVISOES_PATH, [])
+        itens = self._store.ler()
         if not incluir_avaliadas:
             itens = [r for r in itens if r.get("status") == "pendente"]
         itens.sort(key=lambda r: r.get("criado_em", ""), reverse=True)
         return itens
 
     def salvar(self, itens: list[dict]) -> None:
-        _write_json(REVISOES_PATH, itens)
+        self._store.escrever(itens)
 
     def criar(self, revisao: Revisao) -> dict:
         itens = self.listar()

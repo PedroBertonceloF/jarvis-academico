@@ -329,14 +329,17 @@ def listar_tarefas(incluir_concluidas: bool = Query(False)) -> list[dict[str, An
 
 @app.post("/api/tasks")
 def adicionar_tarefa(payload: TarefaRequest) -> dict[str, Any]:
-    return TarefaStore().adicionar(
-        Tarefa(
-            titulo=payload.titulo,
-            prazo=payload.prazo,
-            disciplina=payload.disciplina,
-            prioridade=payload.prioridade,
+    try:
+        return TarefaStore().adicionar(
+            Tarefa(
+                titulo=payload.titulo,
+                prazo=payload.prazo,
+                disciplina=payload.disciplina,
+                prioridade=payload.prioridade,
+            )
         )
-    )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.patch("/api/tasks/{identificador}/complete")
@@ -358,16 +361,19 @@ def consultar_agenda(
 
 @app.post("/api/agenda")
 def adicionar_evento(payload: AgendaRequest) -> dict[str, Any]:
-    return AgendaStore().adicionar(
-        EventoAgenda(
-            data=payload.data,
-            titulo=payload.titulo,
-            hora_inicio=payload.hora_inicio,
-            hora_fim=payload.hora_fim,
-            tipo=payload.tipo,
-            observacao=payload.observacao,
+    try:
+        return AgendaStore().adicionar(
+            EventoAgenda(
+                data=payload.data,
+                titulo=payload.titulo,
+                hora_inicio=payload.hora_inicio,
+                hora_fim=payload.hora_fim,
+                tipo=payload.tipo,
+                observacao=payload.observacao,
+            )
         )
-    )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/api/dificuldades")
