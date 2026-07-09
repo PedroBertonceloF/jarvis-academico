@@ -24,7 +24,7 @@ pinned: false
 
 - **Sistema online:** https://teoz08-jarvis-academico.hf.space
 - **Hugging Face Spaces:** https://huggingface.co/spaces/TeoZ08/jarvis-academico
-- **Repositório GitHub:** https://github.com/TeoZ08/jarvis-academico
+- **Repositório GitHub:** https://github.com/PedroBertonceloF/jarvis-academico
 
 ---
 
@@ -438,7 +438,7 @@ O checklist mapeia planejamento de estudos, melhorias de aprendizado, avaliaçã
 ### Clonar o projeto
 
 ```bash
-git clone https://github.com/TeoZ08/jarvis-academico.git
+git clone https://github.com/PedroBertonceloF/jarvis-academico.git
 cd jarvis-academico
 ```
 
@@ -713,10 +713,10 @@ Observação: as IAs foram utilizadas como ferramentas de apoio. A implementaç�
 
 Projeto desenvolvido para a disciplina de **Inteligência Artificial — FACOM/UFMS** por Matteo Lima e Pedro Bertoncelo.
 
-Repositório principal:
+Repositório:
 
 ```text
-https://github.com/TeoZ08/jarvis-academico
+https://github.com/PedroBertonceloF/jarvis-academico
 ```
 
 Deploy:
@@ -724,3 +724,7 @@ Deploy:
 ```text
 https://huggingface.co/spaces/TeoZ08/jarvis-academico
 ```
+
+## Licença
+
+[MIT](./LICENSE)
